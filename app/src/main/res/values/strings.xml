@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Wifi Lamp</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="connect">Connect</string>
+    <string name="connected_to">Connected To</string>
+    <string name="not_connected">Not Connected</string>
+    <string name="red">Red</string>
+    <string name="green">Green</string>
+    <string name="blue">Blue</string>
+    <string name="save">Save</string>
+    <string name="no_valid_ip">No valid IP in SharedPreferences</string>
+
+    <string name="settings">Settings</string>
+</resources>
