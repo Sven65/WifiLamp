@@ -1,5 +1,7 @@
 package xyz.mackan.wifilamp;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +19,10 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
 
         String BUTTON_ID = getIntent().getStringExtra("BUTTON_ID");
 
-        getSupportActionBar().setTitle(getString(R.string.settings)+" - "+BUTTON_ID);
+        ColorButton data = (ColorButton) getIntent().getExtras().get("BUTTON_DATA");
+
+        getSupportActionBar().setTitle(getString(R.string.settings)+" - "+data.name);
+
     }
 
     @Override
@@ -39,6 +44,12 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
         else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        finish();
     }
 
     @Override

@@ -11,4 +11,6 @@
     <string name="no_valid_ip">No valid IP in SharedPreferences</string>
 
     <string name="settings">Settings</string>
+    <string name="name">Name</string>
+    <string name="delete">Delete</string>
 </resources>

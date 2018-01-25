@@ -2,11 +2,13 @@ package xyz.mackan.wifilamp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +17,15 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-public class ButtonFragment extends Fragment implements Button.OnClickListener, Button.OnLongClickListener {
+import static android.app.Activity.RESULT_OK;
+
+public class ButtonFragment extends Fragment implements Button.OnClickListener, Button.OnLongClickListener{
 
     private ButtonFragment.OnFragmentInteractionListener mListener;
 
@@ -27,7 +33,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
     private FileUtils fileUtils;
 
 
-    private LinkedHashMap<String, ColorButton> buttonData = new LinkedHashMap<String, ColorButton>();
+    public LinkedHashMap<String, ColorButton> buttonData = new LinkedHashMap<String, ColorButton>();
 
     public ButtonFragment() {
         // Required empty public constructor
@@ -57,13 +63,15 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 if(colorData.length >= 4){
 
                     String name = "";
-                    String[] nameParts;
+                    List<String> nameParts = new ArrayList<>();
 
                     // TODO Make a loop from colorData[3] to end and add to string "name" with ":" as delimiter
 
                     for(int i=3;i<colorData.length;i++){
-                        name += colorData[i];
+                        nameParts.add(colorData[i]);
                     }
+
+                    name = TextUtils.join(":", nameParts);
 
                     cButton = new ColorButton(red, green, blue, name);
                 }
@@ -142,7 +150,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
         }
     }
 
-    private void saveButtons(){
+    public void saveButtons(){
         String data = "";
 
         Log.wtf("WIFILAMP", "BUTTON LENGTH: "+buttonData.size());
@@ -157,7 +165,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
             //it.remove();
 
-            stringBuilder.append(colorData.r+":"+colorData.g+":"+colorData.b+" "+colorData.name+"\r\n");
+            stringBuilder.append(colorData.r+":"+colorData.g+":"+colorData.b+":"+colorData.name+"\r\n");
 
         }
 
@@ -228,6 +236,27 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(requestCode == Constants.GET_BUTTON_SETTINGS){
+            if(resultCode == RESULT_OK){
+                ColorButton iButtonData = (ColorButton) data.getExtras().get("BUTTON_DATA");
+
+                buttonData.put(data.getExtras().getString("BUTTON_ID"), iButtonData);
+
+                View rootView = ((Activity)this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
+
+                Button thisButton = (Button) rootView.findViewWithTag(data.getExtras().getString("BUTTON_ID"));
+
+                thisButton.setText(iButtonData.name);
+
+                saveButtons();
+
+                Log.wtf("WIFILAMP", "NEW NAME: "+iButtonData.name);
+            }
+        }
+    }
+
+    @Override
     public boolean onLongClick(View view){
 
         View rootView = ((Activity)this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
@@ -241,8 +270,11 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 Intent mainIntent = new Intent(getActivity(), ButtonSettings.class);
 
                 mainIntent.putExtra("BUTTON_ID", ""+thisButton.getTag());
+                mainIntent.putExtra("BUTTON_DATA", buttonData.get(""+thisButton.getTag()));
 
-                ButtonFragment.this.startActivity(mainIntent);
+                startActivityForResult(mainIntent, Constants.GET_BUTTON_SETTINGS);
+
+
             }
         };
 

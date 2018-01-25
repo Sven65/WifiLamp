@@ -10,4 +10,6 @@ public class Constants {
     public static final String FILE_NAME = "wifi_lamp_buttons.txt";
 
     public static final int CONNECTION_TIMEOUT = 1;
+
+    public static final int GET_BUTTON_SETTINGS = 1;
 }
