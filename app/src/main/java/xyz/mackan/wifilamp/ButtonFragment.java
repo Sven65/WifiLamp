@@ -31,6 +31,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
     private SeekBar redBar, greenBar, blueBar;
     private FileUtils fileUtils;
+    private View thisView;
 
 
     public LinkedHashMap<String, ColorButton> buttonData = new LinkedHashMap<String, ColorButton>();
@@ -140,6 +141,8 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
             addButtonsFromSaveFile(data, rootView);
         }
 
+        thisView = rootView;
+
         return rootView;
     }
 
@@ -207,6 +210,9 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 btn.setText(red+":"+green+":"+blue);
                 btn.setLayoutParams(new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
+/*                btn.setBackgroundColor(getResources().getColor(R.color.buttonColor));
+                btn.setTextColor(getResources().getColor(R.color.buttonText));*/
+
                 btn.setTag(id);
 
                 btn.setOnClickListener(this);
@@ -239,19 +245,36 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == Constants.GET_BUTTON_SETTINGS){
             if(resultCode == RESULT_OK){
-                ColorButton iButtonData = (ColorButton) data.getExtras().get("BUTTON_DATA");
 
-                buttonData.put(data.getExtras().getString("BUTTON_ID"), iButtonData);
+                View rootView = ((Activity) this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
 
-                View rootView = ((Activity)this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
+                int ACTION = data.getExtras().getInt("ACTION");
 
                 Button thisButton = (Button) rootView.findViewWithTag(data.getExtras().getString("BUTTON_ID"));
 
-                thisButton.setText(iButtonData.name);
+                if(ACTION == Constants.SETTING_EDIT) {
 
-                saveButtons();
+                    ColorButton iButtonData = (ColorButton) data.getExtras().get("BUTTON_DATA");
 
-                Log.wtf("WIFILAMP", "NEW NAME: "+iButtonData.name);
+
+                    buttonData.put(data.getExtras().getString("BUTTON_ID"), iButtonData);
+
+                    thisButton.setText(iButtonData.name);
+
+                    saveButtons();
+                }else if(ACTION == Constants.SETTING_DELETE){
+                    buttonData.remove(data.getExtras().getString("BUTTON_ID"));
+
+                    ViewGroup layout = (ViewGroup) thisButton.getParent();
+
+                    if(layout != null){
+                        layout.removeView(thisButton);
+                    }
+
+                    saveButtons();
+                }
+
+
             }
         }
     }

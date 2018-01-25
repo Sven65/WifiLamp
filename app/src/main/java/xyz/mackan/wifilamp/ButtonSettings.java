@@ -17,7 +17,7 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String BUTTON_ID = getIntent().getStringExtra("BUTTON_ID");
+        //String BUTTON_ID = getIntent().getStringExtra("BUTTON_ID");
 
         ColorButton data = (ColorButton) getIntent().getExtras().get("BUTTON_DATA");
 

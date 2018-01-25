@@ -12,4 +12,7 @@ public class Constants {
     public static final int CONNECTION_TIMEOUT = 1;
 
     public static final int GET_BUTTON_SETTINGS = 1;
+
+    public static final int SETTING_EDIT = 1;
+    public static final int SETTING_DELETE = 2;
 }

@@ -79,8 +79,10 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
         nameInput.setText(BUTTON_DATA.name);
 
         Button saveButton = (Button) rootView.findViewById(R.id.saveSettingsButton);
+        Button deleteButton = (Button) rootView.findViewById(R.id.deleteButton);
 
         saveButton.setOnClickListener(this);
+        deleteButton.setOnClickListener(this);
 
         return rootView;
     }
@@ -89,6 +91,8 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
     public void onClick(View v){
         View rootView = ((Activity)this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
 
+        Intent data = new Intent();
+
         switch(v.getId()){
             case R.id.saveSettingsButton:
 
@@ -96,10 +100,21 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
 
                 BUTTON_DATA.name = name.getText().toString();
 
-                Intent data = new Intent();
+
 
                 data.putExtra("BUTTON_ID", BUTTON_ID);
                 data.putExtra("BUTTON_DATA", BUTTON_DATA);
+                data.putExtra("ACTION", Constants.SETTING_EDIT);
+
+                getActivity().setResult(Activity.RESULT_OK, data);
+
+                getActivity().finish();
+            break;
+            case R.id.deleteButton:
+
+                data.putExtra("BUTTON_ID", BUTTON_ID);
+                data.putExtra("BUTTON_DATA", BUTTON_DATA);
+                data.putExtra("ACTION", Constants.SETTING_DELETE);
 
                 getActivity().setResult(Activity.RESULT_OK, data);
 
