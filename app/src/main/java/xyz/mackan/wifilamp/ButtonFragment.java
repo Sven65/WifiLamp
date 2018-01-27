@@ -1,37 +1,45 @@
 package xyz.mackan.wifilamp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-public class ButtonFragment extends Fragment implements Button.OnClickListener, Button.OnLongClickListener{
+public class ButtonFragment extends Fragment implements Button.OnClickListener, Button.OnLongClickListener, AlertDialogCallback{
 
     private ButtonFragment.OnFragmentInteractionListener mListener;
 
     private SeekBar redBar, greenBar, blueBar;
     private FileUtils fileUtils;
     private View thisView;
+
+    private String mString = "";
 
 
     public LinkedHashMap<String, ColorButton> buttonData = new LinkedHashMap<String, ColorButton>();
@@ -40,58 +48,54 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
         // Required empty public constructor
     }
 
+    private String createTransactionID(){
+        return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+    }
+
     private void addButtonsFromSaveFile(String data, View rootView){
 
-        String buttons[] = data.split("\\r?\\n");
+        try {
+            JSONObject jsonObj = new JSONObject(data);
 
-        Log.wtf("BUTTONS SAVE LENGTH", ""+buttons.length);
+            // Getting JSON Array node
+            JSONArray buttons = jsonObj.getJSONArray("buttons");
 
-        for(String color : buttons){
-            ColorButton cButton;
+            // looping through All buttons
+            for (int i = 0; i < buttons.length(); i++) {
+                JSONObject button = buttons.getJSONObject(i);
 
-            String[] colorData = color.split(":");
+                String name = button.getString("name");
+                int r = button.getInt("r");
+                int g = button.getInt("g");
+                int b = button.getInt("b");
 
-            if(colorData.length >= 3) {
+                ColorButton cButton = new ColorButton(r, g, b, name);
 
-                int red = Integer.parseInt(colorData[0]);
-                int green = Integer.parseInt(colorData[1]);
-                int blue = Integer.parseInt(colorData[2]);
-
-                String id = Long.toString(System.currentTimeMillis(), 36);
-
-                cButton = new ColorButton(red, green, blue);
-
-                if(colorData.length >= 4){
-
-                    String name = "";
-                    List<String> nameParts = new ArrayList<>();
-
-                    // TODO Make a loop from colorData[3] to end and add to string "name" with ":" as delimiter
-
-                    for(int i=3;i<colorData.length;i++){
-                        nameParts.add(colorData[i]);
-                    }
-
-                    name = TextUtils.join(":", nameParts);
-
-                    cButton = new ColorButton(red, green, blue, name);
-                }
+                String id = createTransactionID();
 
                 buttonData.put("" + id, cButton);
 
                 TableLayout ll = (TableLayout) rootView.findViewById(R.id.buttonTable);
 
-                Button btn = new Button(this.getContext());
+                FrameLayout fl = (FrameLayout) LayoutInflater.from(getContext()).inflate(R.layout.button_holder, null);
+
+                fl.setBackgroundColor(Color.rgb(r, g, b));
+
+                Button btn = (Button)LayoutInflater.from(getContext()).inflate(R.layout.held_button, null);
+
                 btn.setText(cButton.name);
-                btn.setLayoutParams(new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
                 btn.setTag(id);
 
                 btn.setOnClickListener(this);
                 btn.setOnLongClickListener(this);
 
-                ll.addView(btn);
+                fl.addView(btn);
+
+                ll.addView(fl);
             }
+        } catch (final JSONException e) {
+            Log.e("WIFIBUTTON", "Json parsing error: " + e.getMessage());
         }
 
         Log.wtf("WIFILAMP", "BUTTON LENGTH FROM SAVE: "+buttonData.size());
@@ -154,34 +158,109 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
     }
 
     public void saveButtons(){
-        String data = "";
-
-        Log.wtf("WIFILAMP", "BUTTON LENGTH: "+buttonData.size());
-
         Iterator it = buttonData.entrySet().iterator();
-        StringBuilder stringBuilder = new StringBuilder();
+        JSONObject object = new JSONObject();
+        JSONArray dataArray = new JSONArray();
 
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
+        try {
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
 
-            ColorButton colorData = (ColorButton) pair.getValue();
+                ColorButton colorData = (ColorButton) pair.getValue();
 
-            //it.remove();
+                JSONObject buttonJSON = new JSONObject();
 
-            stringBuilder.append(colorData.r+":"+colorData.g+":"+colorData.b+":"+colorData.name+"\r\n");
+                buttonJSON.put("name", colorData.name);
+                buttonJSON.put("r", colorData.r);
+                buttonJSON.put("g", colorData.g);
+                buttonJSON.put("b", colorData.b);
+
+                dataArray.put(buttonJSON);
+            }
+
+            object.put("buttons", dataArray);
+
+            Log.wtf("WIFILAMP", "BUTTONS: \n"+object.toString(4));
+
+            fileUtils.writeToFile(Constants.FILE_NAME, object.toString(), this.getContext());
+        }catch(JSONException e){
 
         }
-
-        data = stringBuilder.toString();
-
-        data += "\r\n";
-
-        Log.wtf("WIFILAMP", "WRITNG: "+data);
-
-        fileUtils.writeToFile(Constants.FILE_NAME, "\r\n"+data, this.getContext());
-
-        //fileUtils.writeObjectToFile(Constants.FILE_NAME, buttonData, this.getContext());
     }
+
+    private void getInput(String title, final String buttonID, final AlertDialogCallback<String, String> callback){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(title);
+        // I'm using fragment here so I'm using getView() to provide ViewGroup
+        // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.input_dialog, (ViewGroup) getView(), false);
+        // Set up the input
+        final EditText input = (EditText) viewInflated.findViewById(R.id.dialogInput);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        builder.setView(viewInflated);
+
+        // Set up the buttons
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String value = input.getText().toString();
+                dialog.dismiss();
+
+
+                callback.alertDialogCallback(value, buttonID);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                callback.alertDialogCancelCallback(null, buttonID);
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    @Override
+    public void alertDialogCancelCallback(Object ret, Object buttonID){
+        String bID = buttonID.toString();
+
+        Button buttonView = (Button) getView().getRootView().findViewWithTag(bID);
+
+        ViewGroup layout = (ViewGroup) buttonView.getParent();
+
+        if(layout != null){
+            layout.removeView(buttonView);
+        }
+
+        buttonData.remove(bID);
+
+        saveButtons();
+    }
+
+    @Override
+    public void alertDialogCallback(Object ret, Object buttonID) {
+
+        Log.wtf("WIFILAMP",buttonID.toString());
+
+        String bID = buttonID.toString();
+        String name = ret.toString();
+
+        ColorButton currentButton = (ColorButton) buttonData.get(bID);
+        Button buttonView = (Button) getView().getRootView().findViewWithTag(buttonID);
+
+        currentButton.name = name;
+
+        buttonView.setText(name);
+
+        buttonData.put(bID, currentButton);
+
+
+
+        saveButtons();
+    }
+
 
     @Override
     public void onClick(View view){
@@ -198,29 +277,35 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 int green = greenBar.getProgress();
                 int blue = blueBar.getProgress();
 
-                String id = Long.toString(System.currentTimeMillis(), 36);
+                String id = createTransactionID();//Long.toString(System.currentTimeMillis()*10, 36);
+
+                ColorButton cButton = new ColorButton(red, green, blue);
 
                 Log.wtf("WIFILAMP", "ID: "+id);
 
-                buttonData.put(id, new ColorButton(red, green, blue));
-
                 TableLayout ll = (TableLayout) mainView.findViewById(R.id.buttonTable);
 
-                Button btn = new Button(this.getContext());
-                btn.setText(red+":"+green+":"+blue);
-                btn.setLayoutParams(new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                FrameLayout fl = (FrameLayout) LayoutInflater.from(getContext()).inflate(R.layout.button_holder, null);
 
-/*                btn.setBackgroundColor(getResources().getColor(R.color.buttonColor));
-                btn.setTextColor(getResources().getColor(R.color.buttonText));*/
+                fl.setBackgroundColor(Color.rgb(red, green, blue));
+
+                Button btn = (Button)LayoutInflater.from(getContext()).inflate(R.layout.held_button, null);
+
+                buttonData.put(id, cButton);
+
+                btn.setText(red+":"+green+":"+blue);
 
                 btn.setTag(id);
 
                 btn.setOnClickListener(this);
                 btn.setOnLongClickListener(this);
 
-                ll.addView(btn);
+                fl.addView(btn);
                 saveButtons();
 
+                ll.addView(fl);
+
+                getInput("Name", id, this);
 
                 break;
             default:
@@ -256,10 +341,17 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                     ColorButton iButtonData = (ColorButton) data.getExtras().get("BUTTON_DATA");
 
+                    FrameLayout fl = (FrameLayout) thisButton.getParent();
 
                     buttonData.put(data.getExtras().getString("BUTTON_ID"), iButtonData);
 
                     thisButton.setText(iButtonData.name);
+
+                    if(fl != null) {
+
+                        fl.setBackgroundColor(Color.rgb(iButtonData.r, iButtonData.g, iButtonData.b));
+
+                    }
 
                     saveButtons();
                 }else if(ACTION == Constants.SETTING_DELETE){
@@ -305,6 +397,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
         return true;
     }
+
 
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button
+    style="?android:attr/buttonStyleSmall"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="?android:attr/selectableItemBackground"
+    android:elegantTextHeight="true"
+    android:enabled="true"
+    android:textAllCaps="true"
+    android:textColor="@android:color/white"
+    xmlns:android="http://schemas.android.com/apk/res/android" />

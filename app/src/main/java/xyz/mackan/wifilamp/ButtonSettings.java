@@ -2,11 +2,13 @@ package xyz.mackan.wifilamp;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import android.view.MenuItem;
+import android.widget.ImageView;
 
 public class ButtonSettings extends AppCompatActivity implements ButtonSettingsFragment.OnFragmentInteractionListener{
 
@@ -23,6 +25,9 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
 
         getSupportActionBar().setTitle(getString(R.string.settings)+" - "+data.name);
 
+        ImageView colorBox = (ImageView) findViewById(R.id.colorBox);
+
+        colorBox.setBackgroundColor(Color.rgb(data.r, data.g, data.b));
     }
 
     @Override

@@ -5,21 +5,38 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
-public class ButtonSettingsFragment extends Fragment implements Button.OnClickListener {
+import org.w3c.dom.Text;
+
+import java.nio.channels.SelectionKey;
+
+public class ButtonSettingsFragment extends Fragment implements Button.OnClickListener, SeekBar.OnSeekBarChangeListener{
     private ButtonSettingsFragment.OnFragmentInteractionListener mListener;
 
     private String BUTTON_ID = "";
     private ColorButton BUTTON_DATA;
+
+    private SeekBar redBar, greenBar, blueBar;
+    private TextView redText, greenText, blueText;
+
+    private View rootView;
 
     public ButtonSettingsFragment() {
         // Required empty public constructor
@@ -84,6 +101,28 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
         saveButton.setOnClickListener(this);
         deleteButton.setOnClickListener(this);
 
+        redBar = (SeekBar) rootView.findViewById(R.id.seekBarRed);
+        greenBar = (SeekBar) rootView.findViewById(R.id.seekBarGreen);
+        blueBar = (SeekBar) rootView.findViewById(R.id.seekBarBlue);
+
+        redText = (TextView) rootView.findViewById(R.id.textViewRed);
+        greenText = (TextView) rootView.findViewById(R.id.textViewGreen);
+        blueText = (TextView) rootView.findViewById(R.id.textViewBlue);
+
+        redBar.setOnSeekBarChangeListener(this);
+        greenBar.setOnSeekBarChangeListener(this);
+        blueBar.setOnSeekBarChangeListener(this);
+
+        redBar.setProgress(BUTTON_DATA.r);
+        greenBar.setProgress(BUTTON_DATA.g);
+        blueBar.setProgress(BUTTON_DATA.b);
+
+        redText.setText(getString(R.string.red)+": "+BUTTON_DATA.r);
+        greenText.setText(getString(R.string.green)+": "+BUTTON_DATA.g);
+        blueText.setText(getString(R.string.blue)+": "+BUTTON_DATA.b);
+
+        setColor(BUTTON_DATA.r, BUTTON_DATA.g, BUTTON_DATA.b);
+
         return rootView;
     }
 
@@ -99,6 +138,9 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
                 EditText name = (EditText) rootView.findViewById(R.id.nameInput);
 
                 BUTTON_DATA.name = name.getText().toString();
+                BUTTON_DATA.r = redBar.getProgress();
+                BUTTON_DATA.g = greenBar.getProgress();
+                BUTTON_DATA.b = blueBar.getProgress();
 
 
 
@@ -121,6 +163,63 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
                 getActivity().finish();
             break;
         }
+    }
+
+    public void setColor(int r, int g, int b){
+
+        View view = getView();
+        if(view != null) {
+            ImageView colorBox = (ImageView) getView().findViewById(R.id.colorBox);
+
+            colorBox.setBackgroundColor(Color.rgb(r, g, b));
+        }
+
+
+
+        //ActionBar actionBar = getActivity().getActionBar();
+
+        android.support.v7.app.ActionBar actionBar = ((ButtonSettings)getActivity()).getSupportActionBar();
+
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.rgb(r, g, b)));
+
+        /*String title = String.format("#%02x%02x%02x", r, g,b);
+
+        SpannableString s = new SpannableString(title);
+
+        if((r*0.299 + g*0.587 + b*0.114) > 186){
+            // black
+            s.setSpan(new ForegroundColorSpan(Color.BLACK), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }else{
+            //white
+            s.setSpan(new ForegroundColorSpan(Color.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        actionBar.setTitle(s);*/
+    }
+
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+
+        switch(seekBar.getId()){
+            case R.id.seekBarRed:
+                redText.setText(getString(R.string.red)+": "+progress);
+            break;
+            case R.id.seekBarGreen:
+                greenText.setText(getString(R.string.green)+": "+progress);
+            break;
+            case R.id.seekBarBlue:
+                blueText.setText(getString(R.string.blue)+": "+progress);
+            break;
+        }
+
+        this.setColor(redBar.getProgress(), greenBar.getProgress(), blueBar.getProgress());
+    }
+
+    public void onStartTrackingTouch(SeekBar seekBar){
+
+    }
+
+    public void onStopTrackingTouch(SeekBar seekBar){
+
     }
 
     public interface OnFragmentInteractionListener {

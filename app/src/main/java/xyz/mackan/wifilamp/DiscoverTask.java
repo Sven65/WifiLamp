@@ -12,6 +12,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
 
 import java.io.IOException;
@@ -73,9 +74,9 @@ public class DiscoverTask extends AsyncTask<Void, Void, byte[]> {
 
             snackbar.show();
 
-            Button connectButton = (Button) rootView.findViewById(R.id.button);
+            FrameLayout cbHolder = (FrameLayout) rootView.findViewById(R.id.connectButtonHolder);
 
-            connectButton.setVisibility(View.VISIBLE);
+            cbHolder.setVisibility(View.VISIBLE);
         } else {
             try {
                 // set ip addr in SharedPreferences

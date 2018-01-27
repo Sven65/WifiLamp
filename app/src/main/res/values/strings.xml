@@ -13,4 +13,6 @@
     <string name="settings">Settings</string>
     <string name="name">Name</string>
     <string name="delete">Delete</string>
+
+    <string name="dialogInput">Input</string>
 </resources>

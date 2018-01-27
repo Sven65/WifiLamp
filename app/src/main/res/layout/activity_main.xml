@@ -3,10 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     android:scrollIndicators="right"
     android:scrollbarAlwaysDrawHorizontalTrack="false"
     android:scrollbarAlwaysDrawVerticalTrack="true"
@@ -15,7 +11,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/scroller">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,16 +23,17 @@
                 android:id="@+id/main_fragment"
                 android:name="xyz.mackan.wifilamp.MainFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 tools:layout="@layout/fragment_main" />
 
             <fragment
                 android:id="@+id/buttonfragment"
                 android:name="xyz.mackan.wifilamp.ButtonFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/main_fragment"
-                tools:layout="@layout/fragment_buttongrid" />
+                tools:layout="@layout/fragment_buttongrid"
+                />
         </LinearLayout>
     </ScrollView>
 

@@ -7,6 +7,8 @@ public class ColorButton implements Serializable{
 
     public String name;
 
+    public int transition;
+
     public ColorButton(int r, int g, int b, String name){
         this.r = r;
         this.g = g;

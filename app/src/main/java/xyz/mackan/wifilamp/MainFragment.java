@@ -1,21 +1,31 @@
 package xyz.mackan.wifilamp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
-public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallback, SeekBar.OnSeekBarChangeListener, Button.OnClickListener {
+public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallback, SeekBar.OnSeekBarChangeListener, Button.OnClickListener{
     final String LOG_TAG = MainFragment.class.getSimpleName();
 
     private OnFragmentInteractionListener mListener;
@@ -23,6 +33,14 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
     SeekBar redBar, greenBar, blueBar;
     Button connectButton;
     TextView textView, redText, greenText, blueText;
+    ImageView colorBox;
+
+    View rootView;
+
+    FrameLayout cbHolder;
+
+    int currentColor;
+    boolean stopScroll = false;
 
     public MainFragment() {
         // Required empty public constructor
@@ -55,7 +73,9 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        colorBox = (ImageView) rootView.findViewById(R.id.colorBox);
 
         // seekbars
         redBar = (SeekBar) rootView.findViewById(R.id.seekBarRed);
@@ -73,6 +93,8 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
 
         connectButton.setOnClickListener(this);
 
+        cbHolder = (FrameLayout) rootView.findViewById(R.id.connectButtonHolder);
+
         textView = (TextView) rootView.findViewById(R.id.textView);
 
         redText = (TextView) rootView.findViewById(R.id.textViewRed);
@@ -83,7 +105,11 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
         greenText.setText(getString(R.string.green)+": 0");
         blueText.setText(getString(R.string.blue)+": 0");
 
+        setColorBox(0,0,0, "Wifi Lamp - Not connected");
+
         searchForDevices();
+
+
 
         return rootView;
     }
@@ -97,8 +123,15 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
 
     @Override
     public void onClick(View view){
-        connectButton.setVisibility(View.INVISIBLE);
-        searchForDevices();
+        Log.wtf("WIFILAMP", "ID: "+view.getId());
+        switch(view.getId()){
+            case R.id.button:
+                //connectButton.setVisibility(View.INVISIBLE);
+                cbHolder.setVisibility(View.INVISIBLE);
+                searchForDevices();
+            break;
+        }
+
     }
 
     @Override
@@ -163,8 +196,6 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
         greenBar.setProgress(savedGreen);
         blueBar.setProgress(savedBlue);
 
-
-
         this.changeColor();
     }
 
@@ -175,6 +206,32 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
     public void searchForDevices(){
         Log.v(LOG_TAG, "starting DiscoverTask");
         new DiscoverTask(getContext(), this).execute(null, null);
+    }
+
+    public void setColorBox(int r, int g, int b){
+        String title = String.format("#%02x%02x%02x", r, g,b);
+
+        setColorBox(r, g, b, title);
+    }
+
+    public void setColorBox(int r, int g, int b, String title){
+        colorBox.setBackgroundColor(Color.rgb(r, g, b));
+
+        ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.rgb(r, g, b)));
+
+        SpannableString s = new SpannableString(title);
+
+        if((r*0.299 + g*0.587 + b*0.114) > 186){
+            // black
+            s.setSpan(new ForegroundColorSpan(Color.BLACK), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }else{
+            //white
+            s.setSpan(new ForegroundColorSpan(Color.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        actionBar.setTitle(s);
     }
 
     /**
@@ -189,6 +246,9 @@ public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallb
         redText.setText(getString(R.string.red)+": "+r);
         greenText.setText(getString(R.string.green)+": "+g);
         blueText.setText(getString(R.string.blue)+": "+b);
+
+        setColorBox(r, g, b);
+
 
         new ChangeColorTask(getContext()).execute(r, g, b);
     }
