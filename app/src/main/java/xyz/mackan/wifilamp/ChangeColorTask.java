@@ -7,6 +7,9 @@ import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -38,6 +41,8 @@ public class ChangeColorTask extends AsyncTask<Integer, Void, Integer> {
     }
 
     public Integer doInBackground(Integer... params){
+        long BeforeTime = System.currentTimeMillis();
+
         int red = params[0];
         int green = params[1];
         int blue = params[2];

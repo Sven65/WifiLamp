@@ -175,14 +175,11 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
         }
 
 
-
-        //ActionBar actionBar = getActivity().getActionBar();
+        String title = String.format("Settings - %s - #%02x%02x%02x", BUTTON_DATA.name, r, g,b);
 
         android.support.v7.app.ActionBar actionBar = ((ButtonSettings)getActivity()).getSupportActionBar();
 
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.rgb(r, g, b)));
-
-        /*String title = String.format("#%02x%02x%02x", r, g,b);
 
         SpannableString s = new SpannableString(title);
 
@@ -194,7 +191,8 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
             s.setSpan(new ForegroundColorSpan(Color.WHITE), 0, title.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        actionBar.setTitle(s);*/
+        actionBar.setTitle(s);
+
     }
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
