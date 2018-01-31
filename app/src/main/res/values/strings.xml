@@ -15,4 +15,12 @@
     <string name="delete">Delete</string>
 
     <string name="dialogInput">Input</string>
+
+    <string name="addEffect">Add Effect</string>
+
+    <string name="effect_type">Effect Type</string>
+
+    <string name="EFFECT_BLINK">Blink</string>
+
+    <string name="effects">EFFECTS</string>
 </resources>

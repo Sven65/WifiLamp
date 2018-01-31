@@ -68,7 +68,6 @@ public class DiscoverTask extends AsyncTask<Void, Void, byte[]> {
 
         if(result == null){
             // error
-            // TODO
 
             Snackbar snackbar = Snackbar.make(rootView, "No devices found", Snackbar.LENGTH_LONG);
 

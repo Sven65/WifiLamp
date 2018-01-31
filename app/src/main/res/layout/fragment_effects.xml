@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/effect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:capitalize="none"
+        android:text="@string/effects"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textSize="18sp" />
+
+    <TableRow>
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/buttonColor">
+
+            <Button
+                android:id="@+id/addEffect"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:drawableLeft="@drawable/ic_add_white_24dp"
+                android:text="@string/addEffect"
+                android:textColor="@color/buttonText" />
+
+        </FrameLayout>
+    </TableRow>
+</TableLayout>

@@ -2,12 +2,22 @@ package xyz.mackan.wifilamp;
 
 import java.io.Serializable;
 
+import xyz.mackan.wifilamp.effects.EffectData;
+
 public class ColorButton implements Serializable{
     public int r, g, b;
 
     public String name;
+    public EffectData effectData;
 
-    public int transition;
+    public ColorButton(int r, int g, int b, String name, EffectData effectData){
+        this.r = r;
+        this.g = g;
+        this.b = b;
+
+        this.name = name;
+        this.effectData = effectData;
+    }
 
     public ColorButton(int r, int g, int b, String name){
         this.r = r;

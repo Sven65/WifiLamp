@@ -71,6 +71,8 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 ColorButton cButton = new ColorButton(r, g, b, name);
 
+                // TODO: Add code to check for effect
+
                 String id = createTransactionID();
 
                 buttonData.put("" + id, cButton);
@@ -150,7 +152,6 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
         return rootView;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -167,6 +168,8 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 Map.Entry pair = (Map.Entry) it.next();
 
                 ColorButton colorData = (ColorButton) pair.getValue();
+
+                // Todo: Effect stuff
 
                 JSONObject buttonJSON = new JSONObject();
 
@@ -319,6 +322,8 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 Log.wtf("WIFILAMP", ""+colorData);
 
+                // TODO: Add code to check if the button has an effect and trigger it if it does
+
                 redBar.setProgress(colorData.r);
                 greenBar.setProgress(colorData.g);
                 blueBar.setProgress(colorData.b);
@@ -400,7 +405,6 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 }

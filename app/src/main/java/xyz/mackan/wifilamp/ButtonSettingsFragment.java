@@ -27,6 +27,8 @@ import org.w3c.dom.Text;
 
 import java.nio.channels.SelectionKey;
 
+// TODO: Code for adding effects
+
 public class ButtonSettingsFragment extends Fragment implements Button.OnClickListener, SeekBar.OnSeekBarChangeListener{
     private ButtonSettingsFragment.OnFragmentInteractionListener mListener;
 
@@ -221,7 +223,6 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 }

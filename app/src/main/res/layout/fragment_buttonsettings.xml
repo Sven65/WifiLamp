@@ -92,6 +92,16 @@
             android:layout_margin="20dp"
             android:max="255" />
 
+        <fragment
+            android:id="@+id/effectFragment"
+            android:name="xyz.mackan.wifilamp.EffectFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekBarBlue"
+            tools:layout="@layout/fragment_effects"
+            />
+
+
         <View android:id="@+id/emptySpace"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -101,7 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
-            android:layout_below="@+id/seekBarBlue">
+            android:layout_below="@+id/effectFragment">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

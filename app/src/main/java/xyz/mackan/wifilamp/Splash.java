@@ -7,7 +7,6 @@ import android.os.Handler;
 
 public class Splash extends Activity {
 
-    /** Duration of wait **/
 
     /** Called when the activity is first created. */
     @Override
