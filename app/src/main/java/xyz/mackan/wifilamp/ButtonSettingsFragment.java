@@ -147,7 +147,7 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
 
                 LinkedHashMap<String, Step> stepData = ((ButtonSettings)this.getActivity()).getSteps();
 
-                if(!stepData.isEmpty()){
+                if(!stepData.isEmpty() && stepData != null){
                     BUTTON_DATA.steps = stepData;
                 }
 

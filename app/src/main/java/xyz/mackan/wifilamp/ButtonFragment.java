@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import xyz.mackan.wifilamp.Steps.StepConstants;
+import xyz.mackan.wifilamp.Steps.StepData;
 
 import static android.app.Activity.RESULT_OK;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -78,7 +79,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 if(button.get("steps") != null){
                     JSONArray steps = button.getJSONArray("steps");
                     LinkedHashMap<String, Step> stepData = new LinkedHashMap<String, Step>();
-                    Bundle stepD = new Bundle();
+                    StepData stepD = new StepData();
 
                     for (int x = 0; x < steps.length(); x++) {
                         JSONObject row = steps.getJSONObject(x);
@@ -86,17 +87,19 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                         int stepType = row.getInt("stepType");
 
                         if(stepType == StepConstants.STEP_DELAY){
-                            stepD.putInt("duration", row.getInt("duration"));
+                            stepD.duration = row.getInt("duration");
                         }else if(stepType == StepConstants.STEP_SET_COLOR){
-                            stepD.putInt("r", row.getInt("r"));
-                            stepD.putInt("g", row.getInt("g"));
-                            stepD.putInt("b", row.getInt("b"));
+                            stepD.r = row.getInt("r");
+                            stepD.g = row.getInt("g");
+                            stepD.b = row.getInt("b");
                         }
 
                         Step step = new Step(stepType, stepD);
 
                         stepData.put(createTransactionID(), step);
                     }
+
+                    cButton.steps = stepData;
                 }
 
                 String id = createTransactionID();
@@ -213,7 +216,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                     Iterator stepIT = colorData.steps.entrySet().iterator();
 
                     while(stepIT.hasNext()){
-                        Map.Entry stepPair = (Map.Entry) it.next();
+                        Map.Entry stepPair = (Map.Entry) stepIT.next();
 
                         Step step = (Step) stepPair.getValue();
 

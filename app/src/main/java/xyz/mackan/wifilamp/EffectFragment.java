@@ -17,14 +17,21 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TableLayout;
 
+import org.json.JSONArray;
+
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import xyz.mackan.wifilamp.Steps.StepConstants;
+import xyz.mackan.wifilamp.Steps.StepData;
 
 public class EffectFragment extends Fragment implements Button.OnClickListener, InputDialog.InputDialogCallback, ColorDialog.ColorDialogCallback{
 
     DataPassListener mCallback;
+    private ColorButton BUTTON_DATA;
+
 
     public interface DataPassListener{
         public void passData(LinkedHashMap<String, Step> data);
@@ -43,6 +50,16 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     }
 
 
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (DataPassListener) activity;
+        } catch (ClassCastException e) {
+
+        }
+    }
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -57,22 +74,68 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         return fragment;
     }
 
+    public static EffectFragment newInstance(Bundle data) {
+        EffectFragment fragment = new EffectFragment();
+        fragment.setArguments(data);
+        return fragment;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState){
+        super.onActivityCreated(savedInstanceState);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        if (getArguments() != null) {
+    public void addEffectButtons(ColorButton data, Context context){
 
+        if(data != null){
+            steps = data.steps;
+
+            Iterator it = steps.entrySet().iterator();
+
+            while(it.hasNext()){
+                Map.Entry stepPair = (Map.Entry) it.next();
+
+                Step step = (Step) stepPair.getValue();
+
+                if(step.stepType == StepConstants.STEP_OFF){
+                    addButton(getResources().getString(R.string.EFFECT_OFF), createTransactionID(), Color.rgb(0, 0, 255), context);
+                }else if(step.stepType == StepConstants.STEP_DELAY){
+                    addButton(getResources().getString(R.string.EFFECT_DELAY)+" "+step.stepData.duration+" "+getResources().getString(R.string.seconds), createTransactionID(), Color.rgb(0, 0, 255), context);
+                }else if(step.stepType == StepConstants.STEP_SET_COLOR){
+                    addButton(getResources().getString(R.string.EFFECT_SET_COLOR), createTransactionID(), Color.rgb(step.stepData.r, step.stepData.g, step.stepData.b), context);
+                }
+            }
+
+            //mCallback.passData(steps);
+        }
+    }
+
+    public void passData(Object obj){
+        Log.wtf("WIFILAMP", "OBJ TYPE "+obj.getClass().getName());
+
+        //BUTTON_DATA = (ColorButton) obj;
+
+        if(obj == null){
+            Log.wtf("WIFILAMP", "NULL OBJ");
+        }else{
+            Log.wtf("WIFILAMP", "OBJ IS NOT NULL");
+            //addEffectButtons(BUTTON_DATA, this.getContext());
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        Bundle args = getArguments();
+
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_effects, container, false);
-
-        thisView = rootView;
 
         addEffectButton = (Button) rootView.findViewById(R.id.addEffect);
 
@@ -80,6 +143,16 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
         tv = (TableLayout) rootView.findViewById(R.id.effectHolder);
 
+        if(args != null){
+            Log.wtf("WIFILAMP", "ARGS IS NOT NULL");
+            BUTTON_DATA = (ColorButton) args.get("BUTTON_DATA");
+
+            addEffectButtons(BUTTON_DATA, getContext());
+        }
+
+
+
+        thisView = rootView;
         return rootView;
     }
 
@@ -87,14 +160,20 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
     }
 
-    public void addButton(String title, String tag, int color){
+    public void addButton(String title, String tag, int color, Context context){
+        if(tv == null){
+            Log.wtf("WIFILAMP", "TV IS NULL");
+        }else{
+            Log.wtf("WIFILAMP", "TV IS NOT NULL");
+        }
+
         if(tv != null) {
 
-            FrameLayout fl = (FrameLayout) LayoutInflater.from(this.getContext()).inflate(R.layout.button_holder, null);
+            FrameLayout fl = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.button_holder, null);
 
             fl.setBackgroundColor(color);
 
-            Button btn = (Button) LayoutInflater.from(this.getContext()).inflate(R.layout.held_button, null);
+            Button btn = (Button) LayoutInflater.from(context).inflate(R.layout.held_button, null);
 
             btn.setText(title);
 
@@ -135,8 +214,8 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
                         String stepID = createTransactionID();
 
-                        steps.put(stepID, new Step(StepConstants.STEP_OFF, new Bundle()));
-                        addButton("Turn off", stepID, Color.rgb(255, 0, 255));
+                        steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
+                        addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
                         mCallback.passData(steps);
                     break;
                     case 1:
@@ -170,15 +249,15 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     public void inputDialogCallback(Object ret, Object meta) {
         Bundle metaData = (Bundle) meta;
         String inData = (String) ret;
-        Bundle stepData = new Bundle();
+        StepData stepData = new StepData();
         String stepID = createTransactionID();
 
         if(!metaData.isEmpty()) {
             switch (metaData.getInt("type")){
                 case 2:
-                    stepData.putInt("duration", Integer.parseInt(inData));
+                    stepData.duration = Integer.parseInt(inData);
                     steps.put(stepID, new Step(StepConstants.STEP_DELAY, stepData));
-                    addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255));
+                    addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext());
                 break;
             }
             mCallback.passData(steps);
@@ -192,15 +271,15 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
     @Override
     public void colorDialogCallback(Object ret, int r, int g, int b) {
-        Bundle stepData = new Bundle();
+        StepData stepData = new StepData();
         String stepID = createTransactionID();
 
-        stepData.putInt("r", r);
-        stepData.putInt("g", g);
-        stepData.putInt("b", b);
+        stepData.r = r;
+        stepData.g = g;
+        stepData.b = b;
         steps.put(stepID, new Step(StepConstants.STEP_SET_COLOR, stepData));
 
-        addButton("Set color", stepID, Color.rgb(r, g, b));
+        addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext());
         mCallback.passData(steps);
     }
 

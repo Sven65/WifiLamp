@@ -5,13 +5,16 @@ import android.os.Bundle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 import xyz.mackan.wifilamp.Steps.StepConstants;
+import xyz.mackan.wifilamp.Steps.StepData;
 
-public class Step {
+public class Step implements Serializable{
     public int stepType;
-    public Bundle stepData;
+    public StepData stepData;
 
-    public Step(int stepType, Bundle data){
+    public Step(int stepType, StepData data){
         this.stepType = stepType;
         this.stepData = data;
     }
@@ -21,14 +24,13 @@ public class Step {
 
         stepJSON.put("stepType", this.stepType);
 
-        if(!stepData.isEmpty()){
-            if(stepType == StepConstants.STEP_DELAY){
-                stepJSON.put("duration", stepData.get("duration"));
-            }else if(stepType == StepConstants.STEP_SET_COLOR){
-                stepJSON.put("r", stepData.get("r"));
-                stepJSON.put("g", stepData.get("g"));
-                stepJSON.put("b", stepData.get("b"));
-            }
+
+        if(stepType == StepConstants.STEP_DELAY){
+            stepJSON.put("duration", stepData.duration);
+        }else if(stepType == StepConstants.STEP_SET_COLOR){
+            stepJSON.put("r", stepData.r);
+            stepJSON.put("g", stepData.g);
+            stepJSON.put("b", stepData.b);
         }
 
         return stepJSON;

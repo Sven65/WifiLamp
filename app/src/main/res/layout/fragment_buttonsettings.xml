@@ -93,13 +93,12 @@
             android:layout_margin="20dp"
             android:max="255" />
 
-        <fragment
+        <FrameLayout
             android:id="@+id/effectFragment"
-            android:name="xyz.mackan.wifilamp.EffectFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/seekBarBlue"
-            tools:layout="@layout/fragment_effects"
+
             />
 
 

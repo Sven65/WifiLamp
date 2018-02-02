@@ -1,8 +1,10 @@
 package xyz.mackan.wifilamp;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +17,11 @@ import java.util.LinkedHashMap;
 public class ButtonSettings extends AppCompatActivity implements ButtonSettingsFragment.OnFragmentInteractionListener, EffectFragment.DataPassListener{
 
     public LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
+    private ColorButton cbData;
+
+    public ColorButton getCbData(){
+        return this.cbData;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +39,16 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
         ImageView colorBox = (ImageView) findViewById(R.id.colorBox);
 
         colorBox.setBackgroundColor(Color.rgb(data.r, data.g, data.b));
+
+        //Fragment frag = new EffectFragment(); ((EffectFragment)frag).passData(data);
+
+        EffectFragment fragment = EffectFragment.newInstance(getIntent().getExtras());
+
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction().replace(R.id.effectFragment, fragment, "EFFECT");
+        fragmentTransaction.commit();
+
+        this.cbData = data;
     }
 
     @Override
