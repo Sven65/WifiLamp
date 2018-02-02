@@ -115,18 +115,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         }
     }
 
-    public void passData(Object obj){
-        Log.wtf("WIFILAMP", "OBJ TYPE "+obj.getClass().getName());
-
-        //BUTTON_DATA = (ColorButton) obj;
-
-        if(obj == null){
-            Log.wtf("WIFILAMP", "NULL OBJ");
-        }else{
-            Log.wtf("WIFILAMP", "OBJ IS NOT NULL");
-            //addEffectButtons(BUTTON_DATA, this.getContext());
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

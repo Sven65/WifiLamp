@@ -40,8 +40,6 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
 
         colorBox.setBackgroundColor(Color.rgb(data.r, data.g, data.b));
 
-        //Fragment frag = new EffectFragment(); ((EffectFragment)frag).passData(data);
-
         EffectFragment fragment = EffectFragment.newInstance(getIntent().getExtras());
 
         FragmentManager fragmentManager = getFragmentManager();

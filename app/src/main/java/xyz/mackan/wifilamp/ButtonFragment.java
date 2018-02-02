@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import xyz.mackan.wifilamp.Steps.StepConstants;
 import xyz.mackan.wifilamp.Steps.StepData;
+import xyz.mackan.wifilamp.Steps.Stepper;
 
 import static android.app.Activity.RESULT_OK;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -369,11 +370,52 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 Log.wtf("WIFILAMP", ""+colorData);
 
-                // TODO: Add code to check if the button has an effect and trigger it if it does
-
                 redBar.setProgress(colorData.r);
                 greenBar.setProgress(colorData.g);
                 blueBar.setProgress(colorData.b);
+
+                if(colorData.steps != null){
+                    Step lastStep = null;
+
+                    Iterator iterator = colorData.steps.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry pair = (Map.Entry) iterator.next();
+
+                        lastStep = (Step) pair.getValue();
+                    }
+
+                    if(lastStep != null) {
+
+                        if (lastStep.stepType == StepConstants.STEP_OFF) {
+                            if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24) {
+                                redBar.setProgress(0, true);
+                                greenBar.setProgress(0, true);
+                                blueBar.setProgress(0, true);
+                            }else{
+                                redBar.setProgress(0);
+                                greenBar.setProgress(0);
+                                blueBar.setProgress(0);
+                            }
+                        }else if(lastStep.stepType == StepConstants.STEP_SET_COLOR){
+                            if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24){
+                                redBar.setProgress(lastStep.stepData.r, true);
+                                greenBar.setProgress(lastStep.stepData.g, true);
+                                blueBar.setProgress(lastStep.stepData.b, true);
+                            }else{
+                                redBar.setProgress(lastStep.stepData.r);
+                                greenBar.setProgress(lastStep.stepData.g);
+                                blueBar.setProgress(lastStep.stepData.b);
+                            }
+
+                        }
+
+                    }
+
+                    Stepper stepper = new Stepper(colorData, getContext());
+                    stepper.execute();
+                }
+
+
             break;
         }
     }
