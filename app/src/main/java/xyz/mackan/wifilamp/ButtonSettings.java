@@ -10,7 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-public class ButtonSettings extends AppCompatActivity implements ButtonSettingsFragment.OnFragmentInteractionListener{
+import java.util.LinkedHashMap;
+
+public class ButtonSettings extends AppCompatActivity implements ButtonSettingsFragment.OnFragmentInteractionListener, EffectFragment.DataPassListener{
+
+    public LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,5 +64,14 @@ public class ButtonSettings extends AppCompatActivity implements ButtonSettingsF
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void passData(LinkedHashMap<String, Step> data) {
+        steps = data;
+    }
+
+    public LinkedHashMap<String, Step> getSteps(){
+        return steps;
     }
 }

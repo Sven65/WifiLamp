@@ -9,6 +9,7 @@
     <string name="blue">Blue</string>
     <string name="save">Save</string>
     <string name="no_valid_ip">No valid IP in SharedPreferences</string>
+    <string name="seconds">Seconds</string>
 
     <string name="settings">Settings</string>
     <string name="name">Name</string>
@@ -16,11 +17,16 @@
 
     <string name="dialogInput">Input</string>
 
+    <!-- Effect strings -->
+
     <string name="addEffect">Add Effect</string>
 
     <string name="effect_type">Effect Type</string>
 
-    <string name="EFFECT_BLINK">Blink</string>
+    <string name="EFFECT_OFF">Turn off</string>
+    <string name="EFFECT_SET_COLOR">Set Color To</string>
+    <string name="EFFECT_DELAY">Wait</string>
 
+    <string name="effect">EFFECTS</string>
     <string name="effects">EFFECTS</string>
 </resources>

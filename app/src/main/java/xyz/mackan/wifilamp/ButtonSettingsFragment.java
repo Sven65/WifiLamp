@@ -26,6 +26,7 @@ import android.widget.TextView;
 import org.w3c.dom.Text;
 
 import java.nio.channels.SelectionKey;
+import java.util.LinkedHashMap;
 
 // TODO: Code for adding effects
 
@@ -144,11 +145,17 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
                 BUTTON_DATA.g = greenBar.getProgress();
                 BUTTON_DATA.b = blueBar.getProgress();
 
+                LinkedHashMap<String, Step> stepData = ((ButtonSettings)this.getActivity()).getSteps();
 
+                if(!stepData.isEmpty()){
+                    BUTTON_DATA.steps = stepData;
+                }
 
                 data.putExtra("BUTTON_ID", BUTTON_ID);
                 data.putExtra("BUTTON_DATA", BUTTON_DATA);
                 data.putExtra("ACTION", Constants.SETTING_EDIT);
+
+
 
                 getActivity().setResult(Activity.RESULT_OK, data);
 

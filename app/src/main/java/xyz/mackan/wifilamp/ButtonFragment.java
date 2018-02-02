@@ -28,6 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import xyz.mackan.wifilamp.Steps.StepConstants;
+
 import static android.app.Activity.RESULT_OK;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -72,6 +74,30 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 ColorButton cButton = new ColorButton(r, g, b, name);
 
                 // TODO: Add code to check for effect
+
+                if(button.get("steps") != null){
+                    JSONArray steps = button.getJSONArray("steps");
+                    LinkedHashMap<String, Step> stepData = new LinkedHashMap<String, Step>();
+                    Bundle stepD = new Bundle();
+
+                    for (int x = 0; x < steps.length(); x++) {
+                        JSONObject row = steps.getJSONObject(x);
+
+                        int stepType = row.getInt("stepType");
+
+                        if(stepType == StepConstants.STEP_DELAY){
+                            stepD.putInt("duration", row.getInt("duration"));
+                        }else if(stepType == StepConstants.STEP_SET_COLOR){
+                            stepD.putInt("r", row.getInt("r"));
+                            stepD.putInt("g", row.getInt("g"));
+                            stepD.putInt("b", row.getInt("b"));
+                        }
+
+                        Step step = new Step(stepType, stepD);
+
+                        stepData.put(createTransactionID(), step);
+                    }
+                }
 
                 String id = createTransactionID();
 
@@ -163,6 +189,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
         JSONObject object = new JSONObject();
         JSONArray dataArray = new JSONArray();
 
+
         try {
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
@@ -179,6 +206,23 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 buttonJSON.put("b", colorData.b);
 
                 dataArray.put(buttonJSON);
+
+                if(colorData.steps != null){
+                    JSONArray steps = new JSONArray();
+
+                    Iterator stepIT = colorData.steps.entrySet().iterator();
+
+                    while(stepIT.hasNext()){
+                        Map.Entry stepPair = (Map.Entry) it.next();
+
+                        Step step = (Step) stepPair.getValue();
+
+
+                        steps.put(step.toJSON());
+                    }
+
+                    buttonJSON.put("steps", steps);
+                }
             }
 
             object.put("buttons", dataArray);

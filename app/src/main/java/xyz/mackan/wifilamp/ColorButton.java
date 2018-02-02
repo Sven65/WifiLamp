@@ -1,22 +1,21 @@
 package xyz.mackan.wifilamp;
 
 import java.io.Serializable;
-
-import xyz.mackan.wifilamp.effects.EffectData;
+import java.util.LinkedHashMap;
 
 public class ColorButton implements Serializable{
     public int r, g, b;
 
     public String name;
-    public EffectData effectData;
+    public LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
 
-    public ColorButton(int r, int g, int b, String name, EffectData effectData){
+    public ColorButton(int r, int g, int b, String name, LinkedHashMap<String, Step> steps){
         this.r = r;
         this.g = g;
         this.b = b;
 
         this.name = name;
-        this.effectData = effectData;
+        this.steps = steps;
     }
 
     public ColorButton(int r, int g, int b, String name){
