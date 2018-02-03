@@ -31,4 +31,8 @@
 
     <string name="effect">EFFECTS</string>
     <string name="effects">EFFECTS</string>
+
+    <string name="MOVE_UP">Move Up</string>
+    <string name="MOVE_DOWN">Move Down</string>
+    <string name="EDIT">Edit</string>
 </resources>

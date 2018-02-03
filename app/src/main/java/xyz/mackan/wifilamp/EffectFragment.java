@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,22 +18,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import xyz.mackan.wifilamp.Steps.StepConstants;
 import xyz.mackan.wifilamp.Steps.StepData;
 
-public class EffectFragment extends Fragment implements Button.OnClickListener, InputDialog.InputDialogCallback, ColorDialog.ColorDialogCallback{
+public class EffectFragment extends Fragment implements Button.OnClickListener, Button.OnTouchListener, InputDialog.InputDialogCallback, ColorDialog.ColorDialogCallback{
 
     DataPassListener mCallback;
     private ColorButton BUTTON_DATA;
+    private LinkedHashMap<Integer, View> buttons = new LinkedHashMap<Integer, View>();
+
+    float dX;
+    float dY;
+    int lastAction;
+
+    private LockableScroll scroller;
 
     public interface DataPassListener{
         public void passData(LinkedHashMap<String, Step> data);
@@ -116,6 +130,10 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         }
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -139,7 +157,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
             addEffectButtons(BUTTON_DATA, getContext());
         }
 
-
+        scroller = (LockableScroll) getActivity().findViewById(R.id.settingsScroll);
 
         thisView = rootView;
         return rootView;
@@ -149,8 +167,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     public void onClick(View v) {
         if(v.getId() == R.id.addEffect){
             showEffectMenu();
-        }else{
-            showButtonMenu(v);
         }
     }
 
@@ -176,18 +192,21 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
             btn.setTag(tag);
 
             btn.setOnClickListener(this);
+            btn.setOnTouchListener(this);
 
             fl.addView(btn);
 
             tv.addView(fl);
+
+            buttons.put(buttons.size()+1, btn);
         }
     }
 
     public void showButtonMenu(View v){
         // TODO: Add strings and logic to change the button type, metadata and position
         CharSequence options[] = new CharSequence[] {
-                getResources().getString(R.string.EFFECT_OFF),
-                getResources().getString(R.string.EFFECT_DELAY),
+                getResources().getString(R.string.MOVE_UP),
+                getResources().getString(R.string.EDIT),
                 getResources().getString(R.string.EFFECT_SET_COLOR)
         };
 
@@ -285,8 +304,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         builder.show();
     }
 
-
-
     @Override
     public void inputDialogCallback(Object ret, Object meta) {
         Bundle metaData = (Bundle) meta;
@@ -312,6 +329,40 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     }
 
     @Override
+    public boolean onTouch(View view, MotionEvent event) {
+
+        View fl = (View) view.getParent();
+
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                dX = fl.getX() - event.getRawX();
+                dY = fl.getY() - event.getRawY();
+                lastAction = MotionEvent.ACTION_DOWN;
+                scroller.setEnableScrolling(false);
+            break;
+
+            case MotionEvent.ACTION_MOVE:
+                fl.setY(event.getRawY() + dY);
+                fl.setX(event.getRawX() + dX);
+                lastAction = MotionEvent.ACTION_MOVE;
+            break;
+
+            case MotionEvent.ACTION_UP:
+                if (lastAction == MotionEvent.ACTION_DOWN){
+
+                }
+
+                scroller.setEnableScrolling(true);
+                updateFrames();
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    @Override
     public void colorDialogCallback(Object ret, int r, int g, int b) {
         StepData stepData = new StepData();
         String stepID = createTransactionID();
@@ -323,6 +374,39 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
         addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext());
         mCallback.passData(steps);
+    }
+
+    public void updateFrames(){
+        //TODO: Make buttons re-render in their new positions and then save them in the steps
+        LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
+        List<View> buttonStuff = new ArrayList<View>();
+
+        TableLayout rootTableLayout = (TableLayout) getActivity().findViewById(R.id.effectHolder);
+        int count = rootTableLayout.getChildCount();
+        for(int i=0;i<count;i++){
+            View v = rootTableLayout.getChildAt(i);
+            if(v instanceof FrameLayout){
+                buttonStuff.add(v);
+            }
+        }
+
+        Collections.sort(buttonStuff, new Comparator<View>() {
+            public int compare(View button1, View button2) {
+                float b1Y = button1.getY();
+                float b2Y = button2.getY();
+                return Integer.valueOf((int) b1Y).compareTo((int) b2Y);
+            }
+        });
+
+        Iterator it = buttonStuff.iterator();
+
+        while (it.hasNext()){
+            FrameLayout container = (FrameLayout) it.next();
+
+            Button childButton = (Button) container.getChildAt(0);
+
+            Log.wtf("WIFILAMP", "BTN TEXT: "+childButton.getText());
+        }
     }
 
     @Override
