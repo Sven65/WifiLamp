@@ -19,6 +19,8 @@
 
     <!-- Effect strings -->
 
+    <string name="action">Action</string>
+
     <string name="addEffect">Add Effect</string>
 
     <string name="effect_type">Effect Type</string>

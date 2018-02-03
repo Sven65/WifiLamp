@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Gravity;
@@ -364,7 +365,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 String viewTag = ""+view.getTag();
 
-                ColorButton colorData = buttonData.get(viewTag);
+                final ColorButton colorData = buttonData.get(viewTag);
 
                 Log.wtf("WIFILAMP", ""+view.getTag());
 

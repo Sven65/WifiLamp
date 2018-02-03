@@ -7,10 +7,12 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -32,7 +34,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     DataPassListener mCallback;
     private ColorButton BUTTON_DATA;
 
-
     public interface DataPassListener{
         public void passData(LinkedHashMap<String, Step> data);
     }
@@ -49,16 +50,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         // Required empty public constructor
     }
 
-
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            mCallback = (DataPassListener) activity;
-        } catch (ClassCastException e) {
-
-        }
-    }
 
     /**
      * Use this factory method to create a new instance of
@@ -78,6 +69,16 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         EffectFragment fragment = new EffectFragment();
         fragment.setArguments(data);
         return fragment;
+    }
+
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (DataPassListener) activity;
+        } catch (ClassCastException e) {
+
+        }
     }
 
     @Override
@@ -144,17 +145,20 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         return rootView;
     }
 
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.addEffect){
+            showEffectMenu();
+        }else{
+            showButtonMenu(v);
+        }
+    }
+
     private String createTransactionID(){
         return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
     }
 
     public void addButton(String title, String tag, int color, Context context){
-        if(tv == null){
-            Log.wtf("WIFILAMP", "TV IS NULL");
-        }else{
-            Log.wtf("WIFILAMP", "TV IS NOT NULL");
-        }
-
         if(tv != null) {
 
             FrameLayout fl = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.button_holder, null);
@@ -162,6 +166,10 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
             fl.setBackgroundColor(color);
 
             Button btn = (Button) LayoutInflater.from(context).inflate(R.layout.held_button, null);
+
+            Drawable buttonIcon = getContext().getResources().getDrawable( R.drawable.ic_more_vert_white_24dp );
+            buttonIcon.setBounds( 0, 0, 60, 60 );
+            btn.setCompoundDrawables( null, null, buttonIcon, null );
 
             btn.setText(title);
 
@@ -173,6 +181,57 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
             tv.addView(fl);
         }
+    }
+
+    public void showButtonMenu(View v){
+        // TODO: Add strings and logic to change the button type, metadata and position
+        CharSequence options[] = new CharSequence[] {
+                getResources().getString(R.string.EFFECT_OFF),
+                getResources().getString(R.string.EFFECT_DELAY),
+                getResources().getString(R.string.EFFECT_SET_COLOR)
+        };
+
+        final EffectFragment t = this;
+        final Context c;
+        c = this.getContext();
+
+        final Bundle meta = new Bundle();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setTitle(R.string.action);
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0:
+                        // Turn off
+                        //InputDialog id = new InputDialog();
+                        //id.getInput(c, getView(), "Duration", null, t);
+
+                        String stepID = createTransactionID();
+
+                        steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
+                        addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
+                        mCallback.passData(steps);
+                        break;
+                    case 1:
+
+
+                        meta.putInt("type", 2);
+
+                        InputDialog id = new InputDialog();
+                        id.getInput(c, getView(), "Duration", meta, t);
+
+                        break;
+                    case 2:
+                        meta.putInt("type", 3);
+                        ColorDialog cd = new ColorDialog();
+                        cd.getInput(c, getView(), "Color", t);
+                        break;
+                }
+            }
+        });
+        builder.show();
     }
 
     public void showEffectMenu(){
@@ -226,12 +285,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         builder.show();
     }
 
-    @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.addEffect){
-            showEffectMenu();
-        }
-    }
+
 
     @Override
     public void inputDialogCallback(Object ret, Object meta) {
