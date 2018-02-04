@@ -39,7 +39,7 @@ public class ColorDialog implements SeekBar.OnSeekBarChangeListener{
     }
 
     public interface ColorDialogCallback<T, Integer> {
-        public void colorDialogCallback(T ret, int r, int g, int b);
+        public void colorDialogCallback(T ret, Bundle meta, int r, int g, int b);
         public void colorDialogCancelCallback(T ret);
     }
 
@@ -54,11 +54,12 @@ public class ColorDialog implements SeekBar.OnSeekBarChangeListener{
     /**
      * Prompts the user for color input
      * @param context The context to show
+     * @param meta The metadata to return
      * @param view The view to show the dialog in
      * @param title The title to use for the prompt
      * @param callback The callbacks
      */
-    public void getInput(Context context, View view, String title, final ColorDialogCallback<Integer, Integer> callback){
+    public void getInput(Context context, final Bundle meta, View view, String title, final ColorDialogCallback<Integer, Integer> callback){
 
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
         builder.setTitle(title);
@@ -88,7 +89,7 @@ public class ColorDialog implements SeekBar.OnSeekBarChangeListener{
                 dialog.dismiss();
 
 
-                callback.colorDialogCallback(0, redBar.getProgress(), greenBar.getProgress(), blueBar.getProgress());
+                callback.colorDialogCallback(0, meta, redBar.getProgress(), greenBar.getProgress(), blueBar.getProgress());
             }
         });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {

@@ -149,9 +149,22 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         if(!metaData.isEmpty()) {
             switch (metaData.getInt("type")){
                 case 2:
+                    String metaID = metaData.getString("ID");
+
                     stepData.duration = Integer.parseInt(inData);
+                    if(metaID != null){
+                        stepID = metaID;
+                    }
+
                     steps.put(stepID, new Step(StepConstants.STEP_DELAY, stepData));
-                    addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext());
+
+                    if(metaID != null){
+                        addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext(), true);
+                    }else{
+                        addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext());
+                    }
+
+
                     break;
             }
             mCallback.passData(steps);
@@ -183,11 +196,10 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                 break;
 
             case MotionEvent.ACTION_UP:
+                scroller.setEnableScrolling(true);
                 if (lastAction == MotionEvent.ACTION_DOWN){
                     showButtonMenu(view);
                 }else {
-
-                    scroller.setEnableScrolling(true);
                     updateFrames();
                 }
                 break;
@@ -199,16 +211,27 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     }
 
     @Override
-    public void colorDialogCallback(Object ret, int r, int g, int b) {
+    public void colorDialogCallback(Object ret, Bundle meta, int r, int g, int b) {
         StepData stepData = new StepData();
         String stepID = createTransactionID();
 
         stepData.r = r;
         stepData.g = g;
         stepData.b = b;
+
+        String metaID = meta.getString("ID");
+
+        if(metaID != null){
+            stepID = metaID;
+        }
+
         steps.put(stepID, new Step(StepConstants.STEP_SET_COLOR, stepData));
 
-        addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext());
+        if(metaID != null){
+            addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext(), true);
+        }else {
+            addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext());
+        }
         mCallback.passData(steps);
     }
 
@@ -336,8 +359,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         final Context c;
         c = this.getContext();
 
-        final Bundle meta = new Bundle();
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
         builder.setTitle(R.string.action);
         builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -349,10 +370,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
                         String stepID = ""+v.getTag();
 
-                        /*steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
-                        addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
-                        mCallback.passData(steps);*/
-
+                        showEffectMenu(stepID);
                     break;
                     case 1:
                         // Delete
@@ -393,6 +411,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
         final Bundle meta = new Bundle();
 
+        meta.putString("ID", id);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
         builder.setTitle(R.string.effect_type);
@@ -432,7 +451,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                     case 2:
                         meta.putInt("type", 3);
                         ColorDialog cd = new ColorDialog();
-                        cd.getInput(c, getView(), "Color", t);
+                        cd.getInput(c, meta, getView(), "Color", t);
                         break;
                 }
             }
