@@ -3,6 +3,7 @@ package xyz.mackan.wifilamp;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,15 @@ public class InputDialog {
     public interface InputDialogCallback<T, Bundle> {
         public void inputDialogCallback(T ret, Bundle meta);
         public void inputDialogCancelCallback(T ret, Bundle meta);
+
     }
 
     public InputDialog(){
 
+    }
+
+    public void getInput(Context context, View view, String title, final Bundle meta, final InputDialogCallback<String, Bundle> callback){
+        getInput(context, view, title, meta, InputType.TYPE_CLASS_TEXT, callback);
     }
 
     /**
@@ -27,13 +33,15 @@ public class InputDialog {
      * @param meta A bundle to use for metadata
      * @param callback The callbacks
      */
-    public void getInput(Context context, View view, String title, final Bundle meta, final InputDialogCallback<String, Bundle> callback){
+    public void getInput(Context context, View view, String title, final Bundle meta, int inputType, final InputDialogCallback<String, Bundle> callback){
 
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
         builder.setTitle(title);
         View viewInflated = LayoutInflater.from(context).inflate(R.layout.input_dialog, (ViewGroup) view, false);
         // Set up the input
         final EditText input = (EditText) viewInflated.findViewById(R.id.dialogInput);
+
+        input.setInputType(inputType);
         // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         builder.setView(viewInflated);
 

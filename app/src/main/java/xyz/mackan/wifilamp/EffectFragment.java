@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TableLayout;
-import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -445,7 +445,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                         meta.putInt("type", 2);
 
                         InputDialog id = new InputDialog();
-                        id.getInput(c, getView(), "Duration", meta, t);
+                        id.getInput(c, getView(), "Duration", meta, InputType.TYPE_CLASS_NUMBER, t);
 
                         break;
                     case 2:
