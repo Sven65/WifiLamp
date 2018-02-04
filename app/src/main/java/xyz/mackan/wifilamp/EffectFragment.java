@@ -7,10 +7,10 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -18,15 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
-
-import org.json.JSONArray;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EventListener;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -105,36 +102,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         super.onCreate(savedInstanceState);
     }
 
-    public void addEffectButtons(ColorButton data, Context context){
-
-        if(data != null){
-            steps = data.steps;
-
-            Iterator it = steps.entrySet().iterator();
-
-            while(it.hasNext()){
-                Map.Entry stepPair = (Map.Entry) it.next();
-
-                Step step = (Step) stepPair.getValue();
-
-                if(step.stepType == StepConstants.STEP_OFF){
-                    addButton(getResources().getString(R.string.EFFECT_OFF), createTransactionID(), Color.rgb(0, 0, 255), context);
-                }else if(step.stepType == StepConstants.STEP_DELAY){
-                    addButton(getResources().getString(R.string.EFFECT_DELAY)+" "+step.stepData.duration+" "+getResources().getString(R.string.seconds), createTransactionID(), Color.rgb(0, 0, 255), context);
-                }else if(step.stepType == StepConstants.STEP_SET_COLOR){
-                    addButton(getResources().getString(R.string.EFFECT_SET_COLOR), createTransactionID(), Color.rgb(step.stepData.r, step.stepData.g, step.stepData.b), context);
-                }
-            }
-
-            //mCallback.passData(steps);
-        }
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -167,141 +134,9 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     public void onClick(View v) {
         if(v.getId() == R.id.addEffect){
             showEffectMenu();
+        }else{
+            showButtonMenu(v);
         }
-    }
-
-    private String createTransactionID(){
-        return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-    }
-
-    public void addButton(String title, String tag, int color, Context context){
-        if(tv != null) {
-
-            FrameLayout fl = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.button_holder, null);
-
-            fl.setBackgroundColor(color);
-
-            Button btn = (Button) LayoutInflater.from(context).inflate(R.layout.held_button, null);
-
-            Drawable buttonIcon = getContext().getResources().getDrawable( R.drawable.ic_more_vert_white_24dp );
-            buttonIcon.setBounds( 0, 0, 60, 60 );
-            btn.setCompoundDrawables( null, null, buttonIcon, null );
-
-            btn.setText(title);
-
-            btn.setTag(tag);
-
-            btn.setOnClickListener(this);
-            btn.setOnTouchListener(this);
-
-            fl.addView(btn);
-
-            tv.addView(fl);
-
-            buttons.put(buttons.size()+1, btn);
-        }
-    }
-
-    public void showButtonMenu(View v){
-        // TODO: Add strings and logic to change the button type, metadata and position
-        CharSequence options[] = new CharSequence[] {
-                getResources().getString(R.string.MOVE_UP),
-                getResources().getString(R.string.EDIT),
-                getResources().getString(R.string.EFFECT_SET_COLOR)
-        };
-
-        final EffectFragment t = this;
-        final Context c;
-        c = this.getContext();
-
-        final Bundle meta = new Bundle();
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-        builder.setTitle(R.string.action);
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case 0:
-                        // Turn off
-                        //InputDialog id = new InputDialog();
-                        //id.getInput(c, getView(), "Duration", null, t);
-
-                        String stepID = createTransactionID();
-
-                        steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
-                        addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
-                        mCallback.passData(steps);
-                        break;
-                    case 1:
-
-
-                        meta.putInt("type", 2);
-
-                        InputDialog id = new InputDialog();
-                        id.getInput(c, getView(), "Duration", meta, t);
-
-                        break;
-                    case 2:
-                        meta.putInt("type", 3);
-                        ColorDialog cd = new ColorDialog();
-                        cd.getInput(c, getView(), "Color", t);
-                        break;
-                }
-            }
-        });
-        builder.show();
-    }
-
-    public void showEffectMenu(){
-
-        CharSequence effects[] = new CharSequence[] {
-                getResources().getString(R.string.EFFECT_OFF),
-                getResources().getString(R.string.EFFECT_DELAY),
-                getResources().getString(R.string.EFFECT_SET_COLOR)
-        };
-
-        final EffectFragment t = this;
-        final Context c;
-        c = this.getContext();
-
-        final Bundle meta = new Bundle();
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-        builder.setTitle(R.string.effect_type);
-        builder.setItems(effects, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case 0:
-                        // Turn off
-                        //InputDialog id = new InputDialog();
-                        //id.getInput(c, getView(), "Duration", null, t);
-
-                        String stepID = createTransactionID();
-
-                        steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
-                        addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
-                        mCallback.passData(steps);
-                    break;
-                    case 1:
-
-
-                        meta.putInt("type", 2);
-
-                        InputDialog id = new InputDialog();
-                        id.getInput(c, getView(), "Duration", meta, t);
-
-                    break;
-                    case 2:
-                        meta.putInt("type", 3);
-                        ColorDialog cd = new ColorDialog();
-                        cd.getInput(c, getView(), "Color", t);
-                    break;
-                }
-            }
-        });
-        builder.show();
     }
 
     @Override
@@ -317,7 +152,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                     stepData.duration = Integer.parseInt(inData);
                     steps.put(stepID, new Step(StepConstants.STEP_DELAY, stepData));
                     addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext());
-                break;
+                    break;
             }
             mCallback.passData(steps);
         }
@@ -339,21 +174,22 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                 dY = fl.getY() - event.getRawY();
                 lastAction = MotionEvent.ACTION_DOWN;
                 scroller.setEnableScrolling(false);
-            break;
+                break;
 
             case MotionEvent.ACTION_MOVE:
                 fl.setY(event.getRawY() + dY);
-                fl.setX(event.getRawX() + dX);
+                //fl.setX(event.getRawX() + dX);
                 lastAction = MotionEvent.ACTION_MOVE;
-            break;
+                break;
 
             case MotionEvent.ACTION_UP:
                 if (lastAction == MotionEvent.ACTION_DOWN){
+                    showButtonMenu(view);
+                }else {
 
+                    scroller.setEnableScrolling(true);
+                    updateFrames();
                 }
-
-                scroller.setEnableScrolling(true);
-                updateFrames();
                 break;
 
             default:
@@ -376,9 +212,237 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         mCallback.passData(steps);
     }
 
+    @Override
+    public void colorDialogCancelCallback(Object ret) {
+
+    }
+
+    private String createTransactionID(){
+        return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+    }
+
+    public void addEffectButtons(ColorButton data, Context context){
+
+        if(data != null){
+            steps = data.steps;
+
+
+            Iterator it = steps.entrySet().iterator();
+
+            while(it.hasNext()){
+                Map.Entry stepPair = (Map.Entry) it.next();
+
+                Step step = (Step) stepPair.getValue();
+
+                Log.wtf("WIFILAMP", "STEP KEY: "+stepPair.getKey()+" STEP TYPE: "+step.stepType);
+
+                if(step.stepType == StepConstants.STEP_OFF){
+                    addButton(getResources().getString(R.string.EFFECT_OFF), ""+stepPair.getKey(), Color.rgb(0, 0, 255), context);
+                }else if(step.stepType == StepConstants.STEP_DELAY){
+                    addButton(getResources().getString(R.string.EFFECT_DELAY)+" "+step.stepData.duration+" "+getResources().getString(R.string.seconds), ""+stepPair.getKey(), Color.rgb(0, 0, 255), context);
+                }else if(step.stepType == StepConstants.STEP_SET_COLOR){
+                    addButton(getResources().getString(R.string.EFFECT_SET_COLOR), ""+stepPair.getKey(), Color.rgb(step.stepData.r, step.stepData.g, step.stepData.b), context);
+                }
+            }
+
+            //mCallback.passData(steps);
+        }
+    }
+
+    public void addButton(String title, String tag, int color, Context context){
+        addButton(title, tag, color, context, false);
+    }
+
+    public void addButton(String title, String tag, int color, Context context, boolean edit){
+        if(tv != null) {
+
+            if(edit){
+                TableLayout containerParent = (TableLayout) getActivity().findViewById(R.id.effectHolder);
+                Button btn = (Button) containerParent.findViewWithTag(tag);
+
+                if(btn != null){
+                    FrameLayout fl = (FrameLayout) btn.getParent();
+
+                    fl.setBackgroundColor(color);
+
+                    btn.setText(title);
+
+                    btn.setTag(tag);
+
+                    int index = buttons.size()+1;
+
+                    Iterator it = buttons.entrySet().iterator();
+
+                    while (it.hasNext()){
+                        Map.Entry entryPair = (Map.Entry) it.next();
+
+                        Button thisButton = (Button) entryPair.getValue();
+
+                        if(thisButton.getTag() == tag){
+                            index = (int) entryPair.getKey();
+                        }
+                    }
+
+                    buttons.put(index, btn);
+                }
+            }else {
+
+                FrameLayout fl = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.button_holder, null);
+
+                fl.setBackgroundColor(color);
+
+                Button btn = (Button) LayoutInflater.from(context).inflate(R.layout.held_button, null);
+
+                Drawable buttonIcon = getContext().getResources().getDrawable(R.drawable.ic_more_vert_white_24dp);
+                buttonIcon.setBounds(0, 0, 60, 60);
+                btn.setCompoundDrawables(null, null, buttonIcon, null);
+
+                btn.setText(title);
+
+                btn.setTag(tag);
+
+                btn.setOnClickListener(this);
+                btn.setOnTouchListener(this);
+
+                fl.addView(btn);
+
+                tv.addView(fl);
+
+                buttons.put(buttons.size() + 1, btn);
+            }
+        }
+    }
+
+    public void deleteButton(View v){
+        FrameLayout container = (FrameLayout) v.getParent();
+        TableLayout containerParent = (TableLayout) getActivity().findViewById(R.id.effectHolder);
+        container.setLayoutTransition(null);
+
+        if(containerParent != null){
+            containerParent.removeView(container);
+        }
+
+        updateFrames();
+    }
+
+    public void showButtonMenu(final View v){
+        // TODO: Add strings and logic to change the button type and metadata
+        CharSequence options[] = new CharSequence[] {
+                getResources().getString(R.string.EDIT),
+                getResources().getString(R.string.delete)
+        };
+
+        final EffectFragment t = this;
+        final Context c;
+        c = this.getContext();
+
+        final Bundle meta = new Bundle();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setTitle(R.string.action);
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0:
+                        // Edit
+
+                        String stepID = ""+v.getTag();
+
+                        /*steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
+                        addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
+                        mCallback.passData(steps);*/
+
+                    break;
+                    case 1:
+                        // Delete
+
+                        new AlertDialog.Builder(c)
+                        .setTitle(getResources().getString(R.string.confirm_delete_title))
+                        .setMessage(getResources().getString(R.string.confirm_delete)+" "+getResources().getString(R.string.step)+"?")
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                deleteButton(v);
+                            }})
+                        .setNegativeButton(android.R.string.no, null).show();
+
+                    break;
+                }
+            }
+        });
+        builder.show();
+    }
+
+    public void showEffectMenu(){
+        showEffectMenu(null);
+    }
+
+    public void showEffectMenu(final String id){
+
+        CharSequence effects[] = new CharSequence[] {
+                getResources().getString(R.string.EFFECT_OFF),
+                getResources().getString(R.string.EFFECT_DELAY),
+                getResources().getString(R.string.EFFECT_SET_COLOR)
+        };
+
+        final EffectFragment t = this;
+        final Context c;
+        c = this.getContext();
+
+        final Bundle meta = new Bundle();
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setTitle(R.string.effect_type);
+        builder.setItems(effects, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case 0:
+                        // Turn off
+                        //InputDialog id = new InputDialog();
+                        //id.getInput(c, getView(), "Duration", null, t);
+
+                        String stepID = createTransactionID();
+
+                        if(id != null){
+                            stepID = id;
+                        }
+
+                        steps.put(stepID, new Step(StepConstants.STEP_OFF, new StepData()));
+
+                        if(id != null) {
+                            addButton("Turn off", stepID, Color.rgb(255, 0, 255), c, true);
+                        }else{
+                            addButton("Turn off", stepID, Color.rgb(255, 0, 255), c);
+                        }
+                        mCallback.passData(steps);
+                        break;
+                    case 1:
+
+
+                        meta.putInt("type", 2);
+
+                        InputDialog id = new InputDialog();
+                        id.getInput(c, getView(), "Duration", meta, t);
+
+                        break;
+                    case 2:
+                        meta.putInt("type", 3);
+                        ColorDialog cd = new ColorDialog();
+                        cd.getInput(c, getView(), "Color", t);
+                        break;
+                }
+            }
+        });
+        builder.show();
+    }
+
     public void updateFrames(){
         //TODO: Make buttons re-render in their new positions and then save them in the steps
-        LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
+        //LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
         List<View> buttonStuff = new ArrayList<View>();
 
         TableLayout rootTableLayout = (TableLayout) getActivity().findViewById(R.id.effectHolder);
@@ -400,19 +464,44 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
         Iterator it = buttonStuff.iterator();
 
+        LinkedHashMap<String, Step> tempSteps = new LinkedHashMap<String, Step>();
+
         while (it.hasNext()){
             FrameLayout container = (FrameLayout) it.next();
 
             Button childButton = (Button) container.getChildAt(0);
 
+            ((ViewGroup) container.getParent()).removeView(container);
+
+            Drawable background = container.getBackground();
+
+            int color = Color.TRANSPARENT;
+            if (background instanceof ColorDrawable){
+                color = ((ColorDrawable) background).getColor();
+            }
+
+            String tag = (String) childButton.getTag();
+
+            addButton(""+childButton.getText(), tag, color, getContext());
+
+            Log.wtf("WIFILAMP", "TAG: "+tag);
+
+
+            Step tStep = steps.get(tag);
+
+            if(tStep != null){
+                Log.wtf("WIFILAMP", "TAG: "+tag+" STEP TYPE: "+tStep.stepType);
+                tempSteps.put(tag, steps.get(tag));
+            }
+
             Log.wtf("WIFILAMP", "BTN TEXT: "+childButton.getText());
         }
+
+        steps = tempSteps;
+
+        mCallback.passData(steps);
     }
 
-    @Override
-    public void colorDialogCancelCallback(Object ret) {
-
-    }
 
 
     public interface OnFragmentInteractionListener {
