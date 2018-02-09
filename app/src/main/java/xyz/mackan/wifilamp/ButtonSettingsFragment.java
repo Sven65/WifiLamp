@@ -1,7 +1,9 @@
 package xyz.mackan.wifilamp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -125,10 +127,10 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
     }
 
     @Override
-    public void onClick(View v){
+    public void onClick(final View v){
         View rootView = ((Activity)this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
 
-        Intent data = new Intent();
+        final Intent data = new Intent();
 
         switch(v.getId()){
             case R.id.saveSettingsButton:
@@ -157,14 +159,25 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
                 getActivity().finish();
             break;
             case R.id.deleteButton:
-                // TODO: Add a "Really delete button" dialog
-                data.putExtra("BUTTON_ID", BUTTON_ID);
-                data.putExtra("BUTTON_DATA", BUTTON_DATA);
-                data.putExtra("ACTION", Constants.SETTING_DELETE);
 
-                getActivity().setResult(Activity.RESULT_OK, data);
+                new AlertDialog.Builder(getContext())
+                .setTitle(getResources().getString(R.string.confirm_delete_title))
+                .setMessage(getResources().getString(R.string.confirm_delete)+" "+getResources().getString(R.string.step)+"?")
+                .setIcon(R.drawable.ic_warning_black_24dp)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                getActivity().finish();
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        data.putExtra("BUTTON_ID", BUTTON_ID);
+                        data.putExtra("BUTTON_DATA", BUTTON_DATA);
+                        data.putExtra("ACTION", Constants.SETTING_DELETE);
+
+                        getActivity().setResult(Activity.RESULT_OK, data);
+
+                        getActivity().finish();
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
+
+
             break;
         }
     }
