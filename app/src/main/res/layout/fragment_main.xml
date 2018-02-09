@@ -99,7 +99,8 @@
             android:layout_below="@+id/textView"
             android:layout_marginTop="20dp"
             android:id="@+id/connectButtonHolder"
-            android:visibility="invisible">
+            android:visibility="invisible"
+            >
             <Button
                 android:id="@+id/button"
                 android:layout_width="match_parent"
@@ -110,7 +111,8 @@
                 android:textColor="@color/buttonText"
                 android:drawableLeft="@drawable/ic_autorenew_white_24dp"
                 style="?android:attr/buttonStyleSmall"
-                android:background="?android:attr/selectableItemBackground"/>
+                android:background="?android:attr/selectableItemBackground"
+                />
         </FrameLayout>
     </RelativeLayout>
 

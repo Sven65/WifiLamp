@@ -21,8 +21,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TableLayout;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -427,7 +425,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                         new AlertDialog.Builder(c)
                         .setTitle(getResources().getString(R.string.confirm_delete_title))
                         .setMessage(getResources().getString(R.string.confirm_delete)+" "+getResources().getString(R.string.step)+"?")
-                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setIcon(R.drawable.ic_warning_black_24dp)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface dialog, int whichButton) {
@@ -470,8 +468,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                 switch (which){
                     case 0:
                         // Turn off
-                        //InputDialog id = new InputDialog();
-                        //id.getInput(c, getView(), "Duration", null, t);
 
                         String stepID = createTransactionID();
 
@@ -513,7 +509,6 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     }
 
     public void updateFrames(boolean passData){
-        //LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
         List<View> buttonStuff = new ArrayList<View>();
 
         TableLayout rootTableLayout = (TableLayout) getActivity().findViewById(R.id.effectHolder);

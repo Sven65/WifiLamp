@@ -30,26 +30,35 @@ public class Stepper extends AsyncTask<Integer, Void, Integer>{
 
     public void handleStep(Step stepData, final int step) throws ExecutionException, InterruptedException {
         if(stepData != null){
-            Log.wtf("WIFILAMP", "STEPDATA NOT NULL");
 
-            if(step < buttonData.steps.keySet().toArray().length) {
+            if(buttonData.steps.size() >= step) {
 
-                final String m = "" + buttonData.steps.keySet().toArray()[step];
+                String m;
+
+                if(step == buttonData.steps.size()){
+                    m = "" + buttonData.steps.keySet().toArray()[buttonData.steps.size()-1];
+                }else{
+                    m = "" + buttonData.steps.keySet().toArray()[step];
+                }
+
 
                 Log.wtf("WIFILAMP", "ST: " + m);
+
+                Log.wtf("STEPPER", "TYPE ON STEP "+step+": "+stepData.stepType);
 
                 if (stepData.stepType == StepConstants.STEP_OFF) {
                     int res = new ChangeColorTask(context).execute(0, 0, 0).get();
 
                     Log.wtf("WIFILAMP", "OFFRES: "+res);
 
-                    new Stepper(buttonData, context).handleStep(buttonData.steps.get(m), step + 1);
+                    handleStep(buttonData.steps.get(m), step + 1);
                 } else if (stepData.stepType == StepConstants.STEP_DELAY) {
+                    final String finalM = m;
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                new Stepper(buttonData, context).handleStep(buttonData.steps.get(m), step + 1);
+                                handleStep(buttonData.steps.get(finalM), step + 1);
                             } catch (ExecutionException e) {
                                 e.printStackTrace();
                             } catch (InterruptedException e) {
@@ -59,7 +68,7 @@ public class Stepper extends AsyncTask<Integer, Void, Integer>{
                     }, stepData.stepData.duration);
                 } else if (stepData.stepType == StepConstants.STEP_SET_COLOR) {
                     int res = new ChangeColorTask(context).execute(stepData.stepData.r, stepData.stepData.g, stepData.stepData.b).get();
-                    new Stepper(buttonData, context).handleStep(buttonData.steps.get(m), step + 1);
+                    handleStep(buttonData.steps.get(m), step + 1);
                 }
             }
         }else{
@@ -69,7 +78,7 @@ public class Stepper extends AsyncTask<Integer, Void, Integer>{
 
     public void doHandle(){
         try {
-            //buttonData.steps.put(createTransactionID(), new Step(StepConstants.STEP_DELAY, new StepData(0)));
+            //buttonData.steps.put(createTransactionID(), new Step(StepConstants.STEP_DELAY, new StepData(1)));
             handleStep(buttonData.steps.get(buttonData.steps.keySet().toArray()[0]), 0);
         } catch (ExecutionException e) {
             e.printStackTrace();

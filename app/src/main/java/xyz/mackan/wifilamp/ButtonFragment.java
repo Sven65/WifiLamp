@@ -1,20 +1,16 @@
 package xyz.mackan.wifilamp;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
@@ -291,6 +287,7 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 break;
             default:
+
                 //Button currentButton = (Button) mainView.findViewById(view.getId());
 
                 String viewTag = ""+view.getTag();
@@ -301,9 +298,6 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 Log.wtf("WIFILAMP", ""+colorData);
 
-                redBar.setProgress(colorData.r);
-                greenBar.setProgress(colorData.g);
-                blueBar.setProgress(colorData.b);
 
                 if(colorData.steps != null) {
                     if (colorData.steps.size() > 0) {
@@ -343,9 +337,15 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                         }*/
 
+                        // TODO: Make sliders reset to previous state after the effect is done.
+
                         Stepper stepper = new Stepper(colorData, getContext());
                         //stepper.execute();
                         stepper.doHandle();
+                    }else{
+                        redBar.setProgress(colorData.r);
+                        greenBar.setProgress(colorData.g);
+                        blueBar.setProgress(colorData.b);
                     }
                 }
 
