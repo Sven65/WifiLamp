@@ -34,6 +34,10 @@ public class ColorButton implements Serializable{
         this.name = r+":"+g+":"+b;
     }
 
+    public void setSteps(LinkedHashMap<String, Step> steps) {
+        this.steps = steps;
+    }
+
     @Override
     public String toString() {
         return this.r+":"+this.g+":"+this.b;

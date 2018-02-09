@@ -1,12 +1,12 @@
 package xyz.mackan.wifilamp.Steps;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Log;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import xyz.mackan.wifilamp.ChangeColorTask;
 import xyz.mackan.wifilamp.ColorButton;
@@ -24,35 +24,69 @@ public class Stepper extends AsyncTask<Integer, Void, Integer>{
         context = ctx;
     }
 
-    @Override
-    protected Integer doInBackground(Integer... integers) {
-        //new ChangeColorTask(context).execute(0, 0, 0);
+    private String createTransactionID(){
+        return UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+    }
 
-        Iterator it = buttonData.steps.entrySet().iterator();
+    public void handleStep(Step stepData, final int step) throws ExecutionException, InterruptedException {
+        if(stepData != null){
+            Log.wtf("WIFILAMP", "STEPDATA NOT NULL");
 
-        try {
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
+            if(step < buttonData.steps.keySet().toArray().length) {
 
-                Step stepData = (Step) pair.getValue();
+                final String m = "" + buttonData.steps.keySet().toArray()[step];
 
-                if(stepData.stepType == StepConstants.STEP_OFF){
-                    new ChangeColorTask(context).execute(0, 0, 0);
-                }else if(stepData.stepType == StepConstants.STEP_DELAY){
-                    Thread.currentThread();
-                    Thread.sleep(stepData.stepData.duration);
-                    //wait(stepData.stepData.duration);
-                }else if(stepData.stepType == StepConstants.STEP_SET_COLOR){
-                    new ChangeColorTask(context).execute(stepData.stepData.r, stepData.stepData.g, stepData.stepData.b);
+                Log.wtf("WIFILAMP", "ST: " + m);
+
+                if (stepData.stepType == StepConstants.STEP_OFF) {
+                    int res = new ChangeColorTask(context).execute(0, 0, 0).get();
+
+                    Log.wtf("WIFILAMP", "OFFRES: "+res);
+
+                    new Stepper(buttonData, context).handleStep(buttonData.steps.get(m), step + 1);
+                } else if (stepData.stepType == StepConstants.STEP_DELAY) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                new Stepper(buttonData, context).handleStep(buttonData.steps.get(m), step + 1);
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, stepData.stepData.duration);
+                } else if (stepData.stepType == StepConstants.STEP_SET_COLOR) {
+                    int res = new ChangeColorTask(context).execute(stepData.stepData.r, stepData.stepData.g, stepData.stepData.b).get();
+                    new Stepper(buttonData, context).handleStep(buttonData.steps.get(m), step + 1);
                 }
             }
-
-
-            return SUCCESS;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-
-            return FAILURE;
+        }else{
+            Log.wtf("WIFILAMP", "STEPDATA NULL");
         }
+    }
+
+    public void doHandle(){
+        try {
+            //buttonData.steps.put(createTransactionID(), new Step(StepConstants.STEP_DELAY, new StepData(0)));
+            handleStep(buttonData.steps.get(buttonData.steps.keySet().toArray()[0]), 0);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected Integer doInBackground(Integer... integers) {
+        try {
+            handleStep(buttonData.steps.get(buttonData.steps.keySet().toArray()[0]), 0);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

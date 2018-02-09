@@ -1,6 +1,5 @@
 package xyz.mackan.wifilamp;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -23,9 +21,6 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.nio.channels.SelectionKey;
 import java.util.LinkedHashMap;
 
 // TODO: Code for adding effects
@@ -162,7 +157,7 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
                 getActivity().finish();
             break;
             case R.id.deleteButton:
-
+                // TODO: Add a "Really delete button" dialog
                 data.putExtra("BUTTON_ID", BUTTON_ID);
                 data.putExtra("BUTTON_DATA", BUTTON_DATA);
                 data.putExtra("ACTION", Constants.SETTING_DELETE);

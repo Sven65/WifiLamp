@@ -10,6 +10,8 @@
     <string name="save">Save</string>
     <string name="no_valid_ip">No valid IP in SharedPreferences</string>
     <string name="seconds">Seconds</string>
+    <string name="ms">Milliseconds</string>
+    <string name="to">to</string>
 
     <string name="settings">Settings</string>
     <string name="name">Name</string>

@@ -21,6 +21,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TableLayout;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -73,12 +75,14 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
         EffectFragment fragment = new EffectFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
+
         return fragment;
     }
 
     public static EffectFragment newInstance(Bundle data) {
         EffectFragment fragment = new EffectFragment();
         fragment.setArguments(data);
+
         return fragment;
     }
 
@@ -159,9 +163,9 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                     steps.put(stepID, new Step(StepConstants.STEP_DELAY, stepData));
 
                     if(metaID != null){
-                        addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext(), true);
+                        addButton(getResources().getString(R.string.EFFECT_DELAY)+" "+inData+" "+getResources().getString(R.string.ms), stepID, Color.rgb(0, 0, 255), this.getContext(), true);
                     }else{
-                        addButton("Delay " + inData, stepID, Color.rgb(255, 0, 255), this.getContext());
+                        addButton(getResources().getString(R.string.EFFECT_DELAY)+" "+inData+" "+getResources().getString(R.string.ms), stepID, Color.rgb(0, 0, 255), this.getContext());
                     }
 
 
@@ -227,12 +231,15 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
         steps.put(stepID, new Step(StepConstants.STEP_SET_COLOR, stepData));
 
+        String hexColor = String.format("#%06X", (0xFFFFFF & Color.rgb(stepData.r, stepData.g, stepData.b)));
+
         if(metaID != null){
-            addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext(), true);
+
+            addButton(getResources().getString(R.string.EFFECT_SET_COLOR)+" "+getResources().getString(R.string.to)+" "+hexColor, stepID, Color.rgb(r, g, b), this.getContext(), true);
         }else {
-            addButton("Set color", stepID, Color.rgb(r, g, b), this.getContext());
+            addButton(getResources().getString(R.string.EFFECT_SET_COLOR)+" "+getResources().getString(R.string.to)+" "+hexColor, stepID, Color.rgb(r, g, b), this.getContext());
         }
-        mCallback.passData(steps);
+        //mCallback.passData(steps);
     }
 
     @Override
@@ -252,28 +259,51 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
             Iterator it = steps.entrySet().iterator();
 
+            Step thisStep;
+
+
             while(it.hasNext()){
                 Map.Entry stepPair = (Map.Entry) it.next();
 
-                Step step = (Step) stepPair.getValue();
+                thisStep = (Step) stepPair.getValue();
+                if(thisStep != null) {
 
-                Log.wtf("WIFILAMP", "STEP KEY: "+stepPair.getKey()+" STEP TYPE: "+step.stepType);
+                    Log.wtf("WIFILAMP", "STEP KEY: " + stepPair.getKey() + " STEP TYPE: " + thisStep.stepType + " RGB: " + thisStep.stepData.r + ":" + thisStep.stepData.g + ":" + thisStep.stepData.b);
 
-                if(step.stepType == StepConstants.STEP_OFF){
-                    addButton(getResources().getString(R.string.EFFECT_OFF), ""+stepPair.getKey(), Color.rgb(0, 0, 255), context);
-                }else if(step.stepType == StepConstants.STEP_DELAY){
-                    addButton(getResources().getString(R.string.EFFECT_DELAY)+" "+step.stepData.duration+" "+getResources().getString(R.string.seconds), ""+stepPair.getKey(), Color.rgb(0, 0, 255), context);
-                }else if(step.stepType == StepConstants.STEP_SET_COLOR){
-                    addButton(getResources().getString(R.string.EFFECT_SET_COLOR), ""+stepPair.getKey(), Color.rgb(step.stepData.r, step.stepData.g, step.stepData.b), context);
+                    if (thisStep.stepType == StepConstants.STEP_OFF) {
+                        addButton(getResources().getString(R.string.EFFECT_OFF), "" + stepPair.getKey(), Color.rgb(0, 0, 255), context);
+                    } else if (thisStep.stepType == StepConstants.STEP_DELAY) {
+                        addButton(getResources().getString(R.string.EFFECT_DELAY) + " " + thisStep.stepData.duration + " " + getResources().getString(R.string.ms), "" + stepPair.getKey(), Color.rgb(0, 0, 255), context);
+                    } else if (thisStep.stepType == StepConstants.STEP_SET_COLOR) {
+                        String hexColor = String.format("#%06X", (0xFFFFFF & Color.rgb(thisStep.stepData.r, thisStep.stepData.g, thisStep.stepData.b)));
+                        addButton(getResources().getString(R.string.EFFECT_SET_COLOR) + " " + getResources().getString(R.string.to) + " " + hexColor, "" + stepPair.getKey(), Color.rgb(thisStep.stepData.r, thisStep.stepData.g, thisStep.stepData.b), context);
+                    }
                 }
             }
 
+
+            //updateFrames();
             //mCallback.passData(steps);
         }
     }
 
     public void addButton(String title, String tag, int color, Context context){
         addButton(title, tag, color, context, false);
+    }
+
+    public int getTextColor(int backgroundColor){
+        int red = Color.red(backgroundColor);
+        int green = Color.green(backgroundColor);
+        int blue = Color.blue(backgroundColor);
+
+        int returnColor = Color.WHITE;
+
+        if((red*0.299 + green*0.587 + blue*0.114) > 186){
+            // black
+            returnColor = Color.BLACK;
+        }
+
+        return returnColor;
     }
 
     public void addButton(String title, String tag, int color, Context context, boolean edit){
@@ -291,6 +321,18 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                     btn.setText(title);
 
                     btn.setTag(tag);
+
+                    int textColor = getTextColor(color);
+
+                    Drawable buttonIcon = getContext().getResources().getDrawable(R.drawable.ic_more_vert_white_24dp);
+
+                    if(textColor == Color.BLACK){
+                        buttonIcon = getContext().getResources().getDrawable(R.drawable.ic_more_vert_black_24dp);
+                    }
+                    buttonIcon.setBounds(0, 0, 60, 60);
+                    btn.setCompoundDrawables(null, null, buttonIcon, null);
+
+                    btn.setTextColor(textColor);
 
                     int index = buttons.size()+1;
 
@@ -316,10 +358,17 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
                 Button btn = (Button) LayoutInflater.from(context).inflate(R.layout.held_button, null);
 
+                int textColor = getTextColor(color);
+
                 Drawable buttonIcon = getContext().getResources().getDrawable(R.drawable.ic_more_vert_white_24dp);
+
+                if(textColor == Color.BLACK){
+                    buttonIcon = getContext().getResources().getDrawable(R.drawable.ic_more_vert_black_24dp);
+                }
                 buttonIcon.setBounds(0, 0, 60, 60);
                 btn.setCompoundDrawables(null, null, buttonIcon, null);
 
+                btn.setTextColor(textColor);
                 btn.setText(title);
 
                 btn.setTag(tag);
@@ -460,7 +509,10 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     }
 
     public void updateFrames(){
-        //TODO: Make buttons re-render in their new positions and then save them in the steps
+        updateFrames(true);
+    }
+
+    public void updateFrames(boolean passData){
         //LinkedHashMap<String, Step> steps = new LinkedHashMap<String, Step>();
         List<View> buttonStuff = new ArrayList<View>();
 
@@ -518,7 +570,9 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
 
         steps = tempSteps;
 
-        mCallback.passData(steps);
+        if(passData) {
+            mCallback.passData(steps);
+        }
     }
 
 

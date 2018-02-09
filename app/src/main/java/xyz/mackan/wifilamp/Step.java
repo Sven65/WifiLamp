@@ -1,7 +1,5 @@
 package xyz.mackan.wifilamp;
 
-import android.os.Bundle;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -7,9 +7,6 @@ import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

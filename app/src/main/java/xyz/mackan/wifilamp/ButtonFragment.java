@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,18 +33,14 @@ import xyz.mackan.wifilamp.Steps.StepData;
 import xyz.mackan.wifilamp.Steps.Stepper;
 
 import static android.app.Activity.RESULT_OK;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-public class ButtonFragment extends Fragment implements Button.OnClickListener, Button.OnLongClickListener, AlertDialogCallback{
+public class ButtonFragment extends Fragment implements Button.OnClickListener, Button.OnLongClickListener, InputDialog.InputDialogCallback{
 
     private ButtonFragment.OnFragmentInteractionListener mListener;
 
     private SeekBar redBar, greenBar, blueBar;
     private FileUtils fileUtils;
     private View thisView;
-
-    private String mString = "";
-
 
     public LinkedHashMap<String, ColorButton> buttonData = new LinkedHashMap<String, ColorButton>();
 
@@ -76,14 +71,13 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 ColorButton cButton = new ColorButton(r, g, b, name);
 
-                // TODO: Add code to check for effect
-
                 if(button.get("steps") != null){
                     JSONArray steps = button.getJSONArray("steps");
                     LinkedHashMap<String, Step> stepData = new LinkedHashMap<String, Step>();
-                    StepData stepD = new StepData();
+
 
                     for (int x = 0; x < steps.length(); x++) {
+                        StepData stepD = new StepData();
                         JSONObject row = steps.getJSONObject(x);
 
                         int stepType = row.getInt("stepType");
@@ -91,22 +85,25 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                         if(stepType == StepConstants.STEP_DELAY){
                             stepD.duration = row.getInt("duration");
                         }else if(stepType == StepConstants.STEP_SET_COLOR){
-                            stepD.r = row.getInt("r");
-                            stepD.g = row.getInt("g");
-                            stepD.b = row.getInt("b");
+
+                            stepD.setR(row.getInt("r"));
+                            stepD.setG(row.getInt("g"));
+                            stepD.setB(row.getInt("b"));
                         }
 
                         Step step = new Step(stepType, stepD);
 
+                        Log.wtf("WIFILAMP", "STEP TYPE: "+step.stepType+" RGB: "+step.stepData.r+":"+step.stepData.g+":"+step.stepData.b);
+
                         stepData.put(createTransactionID(), step);
                     }
 
-                    cButton.steps = stepData;
+                    cButton.setSteps(stepData);
                 }
 
                 String id = createTransactionID();
 
-                buttonData.put("" + id, cButton);
+                buttonData.put(id, cButton);
 
                 TableLayout ll = (TableLayout) rootView.findViewById(R.id.buttonTable);
 
@@ -240,80 +237,6 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
         }
     }
 
-    private void getInput(String title, final String buttonID, final AlertDialogCallback<String, String> callback){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(title);
-        // I'm using fragment here so I'm using getView() to provide ViewGroup
-        // but you can provide here any other instance of ViewGroup from your Fragment / Activity
-        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.input_dialog, (ViewGroup) getView(), false);
-        // Set up the input
-        final EditText input = (EditText) viewInflated.findViewById(R.id.dialogInput);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        builder.setView(viewInflated);
-
-        // Set up the buttons
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String value = input.getText().toString();
-                dialog.dismiss();
-
-
-                callback.alertDialogCallback(value, buttonID);
-            }
-        });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                callback.alertDialogCancelCallback(null, buttonID);
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-    }
-
-    @Override
-    public void alertDialogCancelCallback(Object ret, Object buttonID){
-        String bID = buttonID.toString();
-
-        Button buttonView = (Button) getView().getRootView().findViewWithTag(bID);
-
-        ViewGroup layout = (ViewGroup) buttonView.getParent();
-
-        if(layout != null){
-            layout.removeView(buttonView);
-        }
-
-        buttonData.remove(bID);
-
-        saveButtons();
-    }
-
-    @Override
-    public void alertDialogCallback(Object ret, Object buttonID) {
-
-        Log.wtf("WIFILAMP",buttonID.toString());
-
-        String bID = buttonID.toString();
-        String name = ret.toString();
-
-        ColorButton currentButton = (ColorButton) buttonData.get(bID);
-        Button buttonView = (Button) getView().getRootView().findViewWithTag(buttonID);
-
-        currentButton.name = name;
-
-        buttonView.setText(name);
-
-        buttonData.put(bID, currentButton);
-
-
-
-        saveButtons();
-    }
-
-
     @Override
     public void onClick(View view){
         View mainView = ((Activity)this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
@@ -357,7 +280,14 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
 
                 ll.addView(fl);
 
-                getInput("Name", id, this);
+                //getInput("Name", id, this);
+
+                Bundle meta = new Bundle();
+
+                meta.putString("BUTTON_ID", id);
+
+                InputDialog inputDialog = new InputDialog();
+                inputDialog.getInput(getContext(), getView(), "Name", meta, this);
 
                 break;
             default:
@@ -375,45 +305,48 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 greenBar.setProgress(colorData.g);
                 blueBar.setProgress(colorData.b);
 
-                if(colorData.steps != null){
-                    Step lastStep = null;
+                if(colorData.steps != null) {
+                    if (colorData.steps.size() > 0) {
+                        Step lastStep = null;
 
-                    Iterator iterator = colorData.steps.entrySet().iterator();
-                    while (iterator.hasNext()) {
-                        Map.Entry pair = (Map.Entry) iterator.next();
+                        Iterator iterator = colorData.steps.entrySet().iterator();
+                        while (iterator.hasNext()) {
+                            Map.Entry pair = (Map.Entry) iterator.next();
 
-                        lastStep = (Step) pair.getValue();
-                    }
-
-                    if(lastStep != null) {
-
-                        if (lastStep.stepType == StepConstants.STEP_OFF) {
-                            if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24) {
-                                redBar.setProgress(0, true);
-                                greenBar.setProgress(0, true);
-                                blueBar.setProgress(0, true);
-                            }else{
-                                redBar.setProgress(0);
-                                greenBar.setProgress(0);
-                                blueBar.setProgress(0);
-                            }
-                        }else if(lastStep.stepType == StepConstants.STEP_SET_COLOR){
-                            if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24){
-                                redBar.setProgress(lastStep.stepData.r, true);
-                                greenBar.setProgress(lastStep.stepData.g, true);
-                                blueBar.setProgress(lastStep.stepData.b, true);
-                            }else{
-                                redBar.setProgress(lastStep.stepData.r);
-                                greenBar.setProgress(lastStep.stepData.g);
-                                blueBar.setProgress(lastStep.stepData.b);
-                            }
-
+                            lastStep = (Step) pair.getValue();
                         }
 
-                    }
+                        /*if(lastStep != null) {
 
-                    Stepper stepper = new Stepper(colorData, getContext());
-                    stepper.execute();
+                            if (lastStep.stepType == StepConstants.STEP_OFF) {
+                                if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24) {
+                                    redBar.setProgress(0, true);
+                                    greenBar.setProgress(0, true);
+                                    blueBar.setProgress(0, true);
+                                }else{
+                                    redBar.setProgress(0);
+                                    greenBar.setProgress(0);
+                                    blueBar.setProgress(0);
+                                }
+                            }else if(lastStep.stepType == StepConstants.STEP_SET_COLOR){
+                                if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24){
+                                    redBar.setProgress(lastStep.stepData.r, true);
+                                    greenBar.setProgress(lastStep.stepData.g, true);
+                                    blueBar.setProgress(lastStep.stepData.b, true);
+                                }else{
+                                    redBar.setProgress(lastStep.stepData.r);
+                                    greenBar.setProgress(lastStep.stepData.g);
+                                    blueBar.setProgress(lastStep.stepData.b);
+                                }
+
+                            }
+
+                        }*/
+
+                        Stepper stepper = new Stepper(colorData, getContext());
+                        //stepper.execute();
+                        stepper.doHandle();
+                    }
                 }
 
 
@@ -479,8 +412,14 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                 /* Create an Intent that will start the Menu-Activity. */
                 Intent mainIntent = new Intent(getActivity(), ButtonSettings.class);
 
-                mainIntent.putExtra("BUTTON_ID", ""+thisButton.getTag());
-                mainIntent.putExtra("BUTTON_DATA", buttonData.get(""+thisButton.getTag()));
+                String tag = ""+thisButton.getTag();
+
+                Log.wtf("BUTTONFRAG", "BID: "+tag);
+
+                ColorButton cb = buttonData.get(tag);
+
+                mainIntent.putExtra("BUTTON_ID", tag);
+                mainIntent.putExtra("BUTTON_DATA", cb);
 
                 startActivityForResult(mainIntent, Constants.GET_BUTTON_SETTINGS);
 
@@ -491,6 +430,49 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
         runnable.run();
 
         return true;
+    }
+
+    @Override
+    public void inputDialogCallback(Object ret, Object meta) {
+        Bundle metaData = (Bundle) meta;
+        String buttonID = (String) metaData.getString("BUTTON_ID");
+
+        if(!metaData.isEmpty()) {
+
+            String name = ret.toString();
+
+            ColorButton currentButton = (ColorButton) buttonData.get(buttonID);
+            Button buttonView = (Button) getView().getRootView().findViewWithTag(buttonID);
+
+            currentButton.name = name;
+
+            buttonView.setText(name);
+
+            buttonData.put(buttonID, currentButton);
+
+            saveButtons();
+        }
+    }
+
+    @Override
+    public void inputDialogCancelCallback(Object ret, Object meta) {
+        Bundle metaData = (Bundle) meta;
+        String buttonID = (String) metaData.getString("BUTTON_ID");
+
+        buttonData.remove(buttonID);
+
+        View rootView = ((Activity) this.getContext()).getWindow().getDecorView().findViewById(android.R.id.content);
+
+
+        Button thisButton = (Button) rootView.findViewWithTag(buttonID);
+
+        ViewGroup layout = (ViewGroup) thisButton.getParent();
+
+        if(layout != null){
+            layout.removeView(thisButton);
+        }
+
+        saveButtons();
     }
 
 

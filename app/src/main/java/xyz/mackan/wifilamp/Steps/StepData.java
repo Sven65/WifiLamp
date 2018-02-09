@@ -9,6 +9,18 @@ public class StepData implements Serializable{
 
     }
 
+    public void setB(Integer b) {
+        this.b = b;
+    }
+
+    public void setR(Integer r) {
+        this.r = r;
+    }
+
+    public void setG(Integer g) {
+        this.g = g;
+    }
+
     public StepData(Integer r, Integer g, Integer b){
         r = r;
         g = g;
