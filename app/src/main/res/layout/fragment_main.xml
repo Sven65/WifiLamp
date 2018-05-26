@@ -36,7 +36,9 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textViewRed"
             android:layout_margin="20dp"
-            android:max="255"/>
+            android:max="255"
+
+            />
 
         <TextView
             android:id="@+id/textViewGreen"

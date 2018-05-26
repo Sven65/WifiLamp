@@ -310,33 +310,6 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                             lastStep = (Step) pair.getValue();
                         }
 
-                        /*if(lastStep != null) {
-
-                            if (lastStep.stepType == StepConstants.STEP_OFF) {
-                                if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24) {
-                                    redBar.setProgress(0, true);
-                                    greenBar.setProgress(0, true);
-                                    blueBar.setProgress(0, true);
-                                }else{
-                                    redBar.setProgress(0);
-                                    greenBar.setProgress(0);
-                                    blueBar.setProgress(0);
-                                }
-                            }else if(lastStep.stepType == StepConstants.STEP_SET_COLOR){
-                                if(Integer.valueOf(android.os.Build.VERSION.SDK) >= 24){
-                                    redBar.setProgress(lastStep.stepData.r, true);
-                                    greenBar.setProgress(lastStep.stepData.g, true);
-                                    blueBar.setProgress(lastStep.stepData.b, true);
-                                }else{
-                                    redBar.setProgress(lastStep.stepData.r);
-                                    greenBar.setProgress(lastStep.stepData.g);
-                                    blueBar.setProgress(lastStep.stepData.b);
-                                }
-
-                            }
-
-                        }*/
-
                         // TODO: Make sliders reset to previous state after the effect is done.
 
                         Stepper stepper = new Stepper(colorData, getContext());
@@ -347,6 +320,10 @@ public class ButtonFragment extends Fragment implements Button.OnClickListener, 
                         greenBar.setProgress(colorData.g);
                         blueBar.setProgress(colorData.b);
                     }
+                }else{
+                    redBar.setProgress(colorData.r);
+                    greenBar.setProgress(colorData.g);
+                    blueBar.setProgress(colorData.b);
                 }
 
 

@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +43,8 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     float dX;
     float dY;
     int lastAction;
+
+    long lastEffectDown, lastEffectDuration;
 
     private LockableScroll scroller;
 
@@ -181,6 +184,8 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     @Override
     public boolean onTouch(View view, MotionEvent event) {
 
+        float flScale = (float) 0.95;
+
         View fl = (View) view.getParent();
 
         switch (event.getActionMasked()) {
@@ -188,13 +193,31 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
                 dX = fl.getX() - event.getRawX();
                 dY = fl.getY() - event.getRawY();
                 lastAction = MotionEvent.ACTION_DOWN;
+
+                lastEffectDown = System.currentTimeMillis();
+
+
                 scroller.setEnableScrolling(false);
+
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                fl.setY(event.getRawY() + dY);
+
                 //fl.setX(event.getRawX() + dX);
                 lastAction = MotionEvent.ACTION_MOVE;
+                lastEffectDuration = System.currentTimeMillis() - lastEffectDown;
+
+
+
+                if(lastEffectDuration >= 500){
+                    fl.setScaleX(flScale);
+                    fl.setY(event.getRawY() + dY);
+                    ViewCompat.setTranslationZ(fl, 1);
+                    scroller.setEnableScrolling(false);
+                }else{
+                    scroller.setEnableScrolling(true);
+                }
+
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -509,6 +532,7 @@ public class EffectFragment extends Fragment implements Button.OnClickListener, 
     }
 
     public void updateFrames(boolean passData){
+        Log.wtf("EFFECT", "UPDATE FRAMES");
         List<View> buttonStuff = new ArrayList<View>();
 
         TableLayout rootTableLayout = (TableLayout) getActivity().findViewById(R.id.effectHolder);

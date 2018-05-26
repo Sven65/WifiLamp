@@ -22,6 +22,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+// TODO: Make the action bar hex color respond to touch when connected to show an input dialog for exact hex color and make that change the sliders and color box aswell as the lamp color
+
 public class MainFragment extends Fragment implements DiscoverTask.DiscoverCallback, SeekBar.OnSeekBarChangeListener, Button.OnClickListener{
     final String LOG_TAG = MainFragment.class.getSimpleName();
 

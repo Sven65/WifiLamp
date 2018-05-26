@@ -162,7 +162,7 @@ public class ButtonSettingsFragment extends Fragment implements Button.OnClickLi
 
                 new AlertDialog.Builder(getContext())
                 .setTitle(getResources().getString(R.string.confirm_delete_title))
-                .setMessage(getResources().getString(R.string.confirm_delete)+" "+getResources().getString(R.string.step)+"?")
+                .setMessage(getResources().getString(R.string.confirm_delete)+" "+getResources().getString(R.string.button)+"?")
                 .setIcon(R.drawable.ic_warning_black_24dp)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
